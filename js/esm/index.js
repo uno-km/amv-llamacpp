@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 OR Commercial-License
+ */
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DependencyMissingError = exports.ModelNotFoundError = exports.TermuxLlamaError = exports.HuggingFaceCrawler = exports.ServerInstance = exports.ServerManager = exports.CURATED_MODELS = exports.ModelManager = exports.LlamaRuntime = void 0;

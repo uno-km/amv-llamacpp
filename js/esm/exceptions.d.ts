@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0 OR Commercial-License
+ */
 export declare class TermuxLlamaError extends Error {
     constructor(message: string);
 }

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """Minimal setup.py wrapper for backward-compatibility with editable installs."""
 
 from setuptools import setup

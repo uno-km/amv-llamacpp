@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """Unit tests for fail-closed security, Ed25519 verification, atomic rollback, model provenance, and build receipts."""
 
 import base64
