@@ -52,12 +52,12 @@ class TestHardwareDetection(unittest.TestCase):
         from termux_llamacpp.hardware import resolve_device_backend
         from termux_llamacpp.exceptions import TermuxLlamaError
 
-        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=None):
+        with patch("ameva_device.runtime_guard.installed_runtime_version", return_value=None):
             with self.assertRaises(TermuxLlamaError) as ctx:
                 resolve_device_backend("vulkan")
             err_text = str(ctx.exception)
-            self.assertIn("AMEVA-LLAMA-E001", err_text)
-            self.assertIn("pip install ameva-runtime", err_text)
+            self.assertIn("AMU_ERR_RUNTIME_REQUIRED", err_text)
+            self.assertIn("pip install", err_text)
 
     def test_resolve_device_backend_vulkan_transparent_error_propagation(self):
         from unittest.mock import patch, MagicMock
@@ -70,6 +70,7 @@ class TestHardwareDetection(unittest.TestCase):
         mock_avr.adapters.llamacpp.LlamaCppAdapter = mock_adapter
 
         with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=mock_avr), \
+             patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"), \
              patch.dict("sys.modules", {"ameva_runtime.adapters.llamacpp": mock_avr.adapters.llamacpp}):
             with self.assertRaises(TermuxLlamaError) as ctx:
                 resolve_device_backend("vulkan")
@@ -83,8 +84,17 @@ class TestHardwareDetection(unittest.TestCase):
         self.assertEqual(backend, "cpu")
         self.assertEqual(ngl, 0)  # CPU NEON strictly forces ngl=0
 
-        backend, ngl = resolve_device_backend("auto", requested_ngl=77)
-        self.assertEqual(ngl, 77)
+        from unittest.mock import patch, MagicMock
+        router = MagicMock()
+        router.SmartRouter.return_value.route_for_llm.return_value = MagicMock(backend="vulkan", ngl=33)
+        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=MagicMock()), \
+             patch.dict("sys.modules", {"ameva_runtime.router": router}):
+            backend, ngl = resolve_device_backend("auto", requested_ngl=77)
+        self.assertEqual((backend, ngl), ("vulkan", 77))
+
+        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=None):
+            backend, ngl = resolve_device_backend("auto", requested_ngl=77)
+        self.assertEqual((backend, ngl), ("cpu", 0))  # no runtime, no GPU
 
     def test_unified_model_search_dirs(self):
         from termux_llamacpp.hardware import get_unified_model_search_dirs
@@ -93,8 +103,10 @@ class TestHardwareDetection(unittest.TestCase):
         self.assertGreater(len(dirs), 0)
 
     def test_resolve_device_backend_opencl(self):
+        from unittest.mock import patch
         from termux_llamacpp.hardware import resolve_device_backend
-        backend, ngl = resolve_device_backend("opencl", requested_ngl=32)
+        with patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"):
+            backend, ngl = resolve_device_backend("opencl", requested_ngl=32)
         self.assertEqual(backend, "opencl")
         self.assertEqual(ngl, 32)
 

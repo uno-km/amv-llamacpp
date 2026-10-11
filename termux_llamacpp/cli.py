@@ -27,6 +27,7 @@ from termux_llamacpp.exceptions import (
     DependencyMissingError,
     TermuxLlamaError,
 )
+from termux_llamacpp.exceptions import RuntimeRequiredError
 
 
 def cmd_install(args):
@@ -40,6 +41,8 @@ def cmd_install(args):
             from_source=getattr(args, "from_source", False),
         )
         print(f"[termux-llama] Native runtime installation completed successfully.")
+    except RuntimeRequiredError:
+        raise
     except Exception as e:
         print(f"[Error] {e}", file=sys.stderr)
         sys.exit(1)
@@ -58,6 +61,8 @@ def cmd_download(args):
             force=args.force,
         )
         print(f"[termux-llama] Successfully downloaded to: {path}")
+    except RuntimeRequiredError:
+        raise
     except TermuxLlamaError as e:
         print(f"\n[Error] {e}", file=sys.stderr)
         sys.exit(1)
@@ -126,6 +131,8 @@ def cmd_serve(args):
                     logger.debug("Health probe timed out (attempt %d/120)", i + 1)
                 except requests.exceptions.ConnectionError:
                     logger.debug("Health probe connection refused (server booting, attempt %d/120)", i + 1)
+                except RuntimeRequiredError:
+                    raise
                 except Exception as exc:
                     logger.debug("Health probe error during warmup: %s", exc)
         except KeyboardInterrupt:
@@ -168,11 +175,15 @@ def cmd_serve(args):
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n[termux-llama] Stopping server...")
+    except RuntimeRequiredError:
+        raise
     except TermuxLlamaError as e:
         print(f"\n[Error] {e}", file=sys.stderr)
         if e.__cause__:
             print(f"\n[Underlying Cause] {type(e.__cause__).__name__}: {e.__cause__}", file=sys.stderr)
         sys.exit(1)
+    except RuntimeRequiredError:
+        raise
     except Exception as e:
         print(f"\n[Error: Server Exception] {type(e).__name__}: {e}", file=sys.stderr)
         import traceback
@@ -231,11 +242,15 @@ def cmd_run(args):
             tensor_split=getattr(args, "tensor_split", None),
         )
         print(output)
+    except RuntimeRequiredError:
+        raise
     except TermuxLlamaError as e:
         print(f"\n[Error] {e}", file=sys.stderr)
         if e.__cause__:
             print(f"\n[Underlying Cause] {type(e.__cause__).__name__}: {e.__cause__}", file=sys.stderr)
         sys.exit(1)
+    except RuntimeRequiredError:
+        raise
     except Exception as e:
         print(f"\n[Error: Runtime Exception] {type(e).__name__}: {e}", file=sys.stderr)
         import traceback
@@ -273,6 +288,8 @@ def cmd_stop(args):
             pid_content = pid_file.read_text(encoding="utf-8").strip()
             if pid_content.isdigit():
                 target_pids.add(int(pid_content))
+        except RuntimeRequiredError:
+            raise
         except Exception as e:
             import logging
             logging.getLogger(__name__).warning("Failed to read PID file '%s': %s", pid_file, e)
@@ -340,6 +357,8 @@ def cmd_find(args):
         results = crawler.discover(query=args.query, limit=args.limit, deep_crawl=False)
         for r in results:
             print(f" • {r.repo_id}")
+    except RuntimeRequiredError:
+        raise
     except Exception as e:
         print(f"[Error] Search failed: {e}", file=sys.stderr)
         sys.exit(1)
@@ -394,6 +413,21 @@ def cmd_doctor(args):
 
 
 def main():
+    """CLI entry point.
+
+    A GPU request without a usable ameva-runtime ends here with the shared explanation on stderr
+    and exit status 69, whichever sub-command raised it.
+    """
+    from termux_llamacpp.exceptions import RuntimeRequiredError
+    try:
+        return _main_impl()
+    except RuntimeRequiredError as err:
+        sys.stderr.write(str(err))
+        sys.stderr.flush()
+        return 69
+
+
+def _main_impl():
     KNOWN_COMMANDS = {
         "install", "download", "serve", "run", "stop", "find",
         "list", "models", "presets", "doctor", "hardware",
@@ -525,6 +559,8 @@ def main():
         elif args.command in ("component", "model", "instance"):
             print("[ERROR] ameva-component-sdk not installed. Run: pip install ameva-component-sdk", file=sys.stderr)
             sys.exit(1)
+    except RuntimeRequiredError:
+        raise
     except TermuxLlamaError as e:
         print(str(e), file=sys.stderr)
         if e.__cause__:

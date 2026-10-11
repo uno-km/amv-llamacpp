@@ -324,6 +324,46 @@ def detect_vulkan_int_dot() -> Optional[int]:
     return None
 
 
+GPU_RUNTIME_MIN_VERSION = "2.0.0"
+
+
+def _require_gpu_runtime(requested_device: str) -> None:
+    """Stop with the shared AMU_ERR_RUNTIME_REQUIRED explanation unless ameva-runtime is usable.
+
+    Every explicit GPU request goes through here. There is no CPU fallback: the caller gets
+    RuntimeRequiredError and the CLI exits with status 69.
+    """
+    from termux_llamacpp.exceptions import RuntimeRequiredError
+    try:
+        from ameva_device import AmevaRuntimeRequiredError, require_ameva_runtime
+    except ImportError as exc:
+        raise RuntimeRequiredError(
+            "[AMU_ERR_RUNTIME_REQUIRED] termux-llamacpp: GPU execution (device='%s') needs ameva-runtime (AMUDA), "
+            "and the shared check library 'ameva-device-sdk' is missing from this installation.\n"
+            "Nothing was run, and no CPU fallback was used.\n"
+            "Install:\n"
+            "  pip install \"ameva-runtime>=%s\"\n"
+            "  npm install -g @ameva/runtime\n"
+            "  Releases and documentation: https://github.com/uno-km/ameva-runtime-releases\n"
+            "To run on the CPU instead, use --device cpu.\n" % (requested_device, GPU_RUNTIME_MIN_VERSION)
+        ) from exc
+    try:
+        require_ameva_runtime(
+            "termux-llamacpp", "GPU execution (device='%s')" % requested_device,
+            min_version=GPU_RUNTIME_MIN_VERSION,
+        )
+    except AmevaRuntimeRequiredError as exc:
+        raise RuntimeRequiredError(str(exc)) from exc
+
+
+def _note_cpu_instead(reason: str) -> None:
+    """auto mode: say on stderr that the GPU was not used, so the CPU run is never silent."""
+    import sys
+    sys.stderr.write("[termux-llamacpp] GPU not used: %s. This run uses the CPU. "
+                     "To enable the GPU: pip install ameva-runtime (https://github.com/uno-km/ameva-runtime-releases)\n" % reason)
+    sys.stderr.flush()
+
+
 def resolve_device_backend(requested_device: str, requested_ngl: Optional[int] = None) -> tuple[str, int]:
     """Resolve the user's device= argument to an actual backend and ngl count.
 
@@ -353,25 +393,8 @@ def resolve_device_backend(requested_device: str, requested_ngl: Optional[int] =
 
     # [규칙 2] 사용자가 명시적으로 gpu/vulkan을 요청한 경우: 100% GPU 강제 (침묵 폴백 금지, 미지원 시 Fail-Fast)
     if req in ("vulkan", "gpu"):
-        if ameva_mod is None:
-            raise TermuxLlamaError(
-                "\n"
-                "================================================================================\n"
-                "[FAIL-FAST] [ERROR: AMEVA-LLAMA-E001] GPU acceleration requires 'ameva-runtime'!\n"
-                "================================================================================\n"
-                "Hardware acceleration provider 'ameva-runtime' is not installed on this system.\n"
-                "Explicit GPU execution ('--gpu' / '--device vulkan') cannot proceed.\n"
-                "Forced CPU fallback is strictly disabled under Zero-Silent-Fallback policy.\n\n"
-                "To unlock native GPU (Vulkan) hardware acceleration on your mobile SoC:\n"
-                "  - Python:  pip install ameva-runtime\n"
-                "  - Node.js: npm install @unokm/ameva-runtime\n"
-                "Or explicitly execute in ARM64 CPU NEON mode via:\n"
-                "  --device cpu\n\n"
-                "For full documentation and hardware setup, visit:\n"
-                "  https://github.com/uno-km/termux-llamacpp\n"
-                "================================================================================\n"
-            )
-
+        # Every explicit GPU request needs ameva-runtime (AMUDA); no CPU fallback.
+        _require_gpu_runtime(req)
         # Check native Vulkan availability via ameva-runtime Adapter or Vulkan probe
         try:
             try:
@@ -410,6 +433,7 @@ def resolve_device_backend(requested_device: str, requested_ngl: Optional[int] =
 
     # [규칙 3] 사용자가 명시적으로 opencl을 요청한 경우: 100% OpenCL 강제
     if req == "opencl":
+        _require_gpu_runtime(req)
         try:
             from ameva_runtime.adapters.llamacpp import LlamaCppAdapter
             binding = LlamaCppAdapter.bind(requested_backend="opencl", requested_ngl=ngl_target)
@@ -423,30 +447,19 @@ def resolve_device_backend(requested_device: str, requested_ngl: Optional[int] =
     # [규칙 4] 사용자가 옵션을 주지 않았거나 'auto'인 경우:
     # 1순위: GPU 우선 검사 -> int_dot 감지 -> int_dot 지원 시 GPU, 미지원 시 CPU 안전 실행
     if req == "auto":
-        if ameva_mod is not None:
-            try:
-                from ameva_runtime.router import SmartRouter
-                plan = SmartRouter().route_for_llm(requested_backend=None, requested_ngl=requested_ngl)
-                mapped_backend = "cpu" if plan.backend in ("cpu", "cpu_neon") else plan.backend
-                effective_ngl = requested_ngl if requested_ngl is not None else plan.ngl
-                logger.info("Auto-detected optimal backend via ameva-runtime: %s (ngl=%s)", mapped_backend, effective_ngl)
-                return mapped_backend, effective_ngl
-            except Exception as e:
-                logger.debug("[termux-llamacpp] SmartRouter evaluation fallback: %s", e)
-
-        int_dot = detect_vulkan_int_dot()
-        has_vulkan = os.path.exists("/system/lib64/libvulkan.so") or os.path.exists("/vendor/lib64/libvulkan.so")
-        if has_vulkan:
-            if int_dot == 0:
-                sys.stdout.write("[INFO] GPU lacks hardware integer dot product (int dot: 0). Auto-routing to ARM64 NEON CPU.\n")
-                sys.stdout.flush()
-                return "cpu", 0
-            return "vulkan", ngl_target
-
-        sys.stdout.write("[INFO] No compatible Vulkan GPU detected. Defaulting to ARM64 NEON CPU.\n")
-        sys.stdout.flush()
-        return "cpu", 0
-
+        if ameva_mod is None:
+            _note_cpu_instead("ameva-runtime (AMUDA) is not installed")
+            return "cpu", 0
+        try:
+            from ameva_runtime.router import SmartRouter
+            plan = SmartRouter().route_for_llm(requested_backend=None, requested_ngl=requested_ngl)
+            mapped_backend = "cpu" if plan.backend in ("cpu", "cpu_neon") else plan.backend
+            effective_ngl = requested_ngl if requested_ngl is not None else plan.ngl
+            logger.info("Auto-detected optimal backend via ameva-runtime: %s (ngl=%s)", mapped_backend, effective_ngl)
+            return mapped_backend, effective_ngl
+        except Exception as e:
+            _note_cpu_instead("GPU routing failed (%s)" % e)
+            return "cpu", 0
     raise ValueError(f"Unsupported device '{requested_device}'. Must be one of ['auto', 'gpu', 'vulkan', 'opencl', 'cpu'].")
 
 
