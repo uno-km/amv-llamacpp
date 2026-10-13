@@ -1,3 +1,14 @@
+# v1.5.0 (2026-10-13) — Unified ameva-runtime HAL & Decoupled Architecture
+
+Unified GGUF transformer GPU layer offloading via ameva-runtime HAL and standardized dual Python/Node.js SDK interfaces with SPDX compliance.
+
+### Key Changes
+- Unified GGUF GPU offloading and Vulkan compute dispatch via ameva-runtime HAL.
+- Synchronized Python and Node.js CLI/SDK parameter contracts.
+- Enforced OpenSSF SPDX license headers across all files.
+
+---
+
 ## [1.3.12] - 2026-09-29
 
 ### Fixed & Hardened
