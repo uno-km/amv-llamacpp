@@ -66,10 +66,10 @@ keywords = [
     "model-manager",
     "reverse-proxy",
     "daemon-supervisor",
-    "termux-aichain",
-    "termux-tts",
-    "termux-stt",
-    "termux-diffusion",
+    "amv-aichain",
+    "amv-tts",
+    "amv-stt",
+    "amv-diffusion",
     "ameva-runtime",
     "quantization-q4",
     "bionic-libc",
@@ -91,23 +91,23 @@ security = [
     "cryptography>=42.0.0",
 ]
 crawler = [
-    "termux-playwright>=1.70.0",
+    "amv-playwright>=1.70.0",
 ]
 test = [
     "pytest>=7.0.0",
 ]
 
 [project.scripts]
-termux-llama = "termux_llamacpp.cli:main"
-termux-llamacpp = "termux_llamacpp.cli:main"
+amv-llama = "termux_llamacpp.cli:main"
+amv-llamacpp = "termux_llamacpp.cli:main"
 
 [project.entry-points."ameva.components"]
-termux-llamacpp = "termux_llamacpp.adapter:create_adapter"
+amv-llamacpp = "termux_llamacpp.adapter:create_adapter"
 
 [project.urls]
-Homepage = "https://uno-km.github.io/termux-llamacpp"
-Repository = "https://github.com/uno-km/termux-llamacpp"
-Documentation = "https://uno-km.github.io/termux-llamacpp"
+Homepage = "https://uno-km.github.io/amv-llamacpp"
+Repository = "https://github.com/uno-km/amv-llamacpp"
+Documentation = "https://uno-km.github.io/amv-llamacpp"
 
 [tool.setuptools.packages.find]
 include = ["termux_llamacpp", "termux_llamacpp.*"]

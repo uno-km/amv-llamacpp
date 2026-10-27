@@ -13,8 +13,8 @@
     "README.md"
   ],
   "bin": {
-    "termux-llama": "bin/cli.js",
-    "termux-llamacpp": "bin/cli.js"
+    "amv-llama": "bin/cli.js",
+    "amv-llamacpp": "bin/cli.js"
   },
   "scripts": {
     "build": "tsc -p js/tsconfig.json",
@@ -61,10 +61,10 @@
     "model-manager",
     "reverse-proxy",
     "daemon-supervisor",
-    "termux-aichain",
-    "termux-tts",
-    "termux-stt",
-    "termux-diffusion",
+    "amv-aichain",
+    "amv-tts",
+    "amv-stt",
+    "amv-diffusion",
     "ameva-runtime",
     "quantization-q4",
     "bionic-libc",
@@ -76,18 +76,18 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uno-km/termux-llamacpp.git"
+    "url": "https://github.com/uno-km/amv-llamacpp.git"
   },
   "dependencies": {},
   "peerDependencies": {
     "@ameva/runtime": ">=2.0.0",
-    "termux-playwright": ">=1.70.0"
+    "amv-playwright": ">=1.70.0"
   },
   "peerDependenciesMeta": {
     "@ameva/runtime": {
       "optional": true
     },
-    "termux-playwright": {
+    "amv-playwright": {
       "optional": true
     }
   }
