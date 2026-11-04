@@ -263,7 +263,7 @@ class LlamaRuntime:
                     "Or explicitly execute in ARM64 CPU NEON mode via:\n"
                     "  --device cpu\n\n"
                     "For full documentation and hardware setup, visit:\n"
-                    "  https://github.com/uno-km/termux-llamacpp\n"
+                    "  https://github.com/uno-km/amv-llamacpp\n"
                     "================================================================================\n"
                 )
             # Note: Termux binaries already embed DT_RUNPATH. $PREFIX/lib is strictly NOT injected

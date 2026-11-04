@@ -438,10 +438,10 @@ def _main_impl():
         sys.argv.insert(1, "run")
 
     parser = argparse.ArgumentParser(
-        prog="termux-llama",
+        prog="amv-llama",
         description="Universal GGUF Runtime, Model Manager & OpenAI Server for Android Termux & ARM64",
     )
-    parser.add_argument("--version", action="version", version=f"termux-llamacpp {__version__}")
+    parser.add_argument("--version", action="version", version=f"amv-llamacpp {__version__}")
     parser.add_argument("-d", "--daemon", action="store_true", help="Run in background daemon mode")
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
 

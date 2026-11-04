@@ -8,7 +8,7 @@
 const { spawn } = require('child_process');
 
 module.exports = {
-  packageName: 'termux-llamacpp',
+  packageName: 'amv-llamacpp',
   moduleName: 'termux_llamacpp',
   runCli: function(args = []) {
     const pythonBin = process.env.PYTHON || 'python3';

@@ -1,3 +1,15 @@
+# v1.5.1 (2026-11-04) — Installer follows the amv-llamacpp package name
+
+The package was renamed from `termux-llamacpp` to `amv-llamacpp` in 1.5.0, but `install.sh` still installed the old PyPI name (latest 1.4.0). This release fixes the installer:
+
+- installs `amv-llamacpp` from PyPI and npm, and reads releases from `uno-km/amv-llamacpp`;
+- uninstalls the old `termux-llamacpp` Python distribution before installing, since both ship the `termux_llamacpp` module;
+- shows `amv-llama` / `amv-llamacpp` in the CLI program name and `--version`.
+
+The import name `termux_llamacpp`, the model cache directory and release asset names are unchanged.
+
+---
+
 # v1.5.0 (2026-10-13) — Unified ameva-runtime HAL & Decoupled Architecture
 
 Unified GGUF transformer GPU layer offloading via ameva-runtime HAL and standardized dual Python/Node.js SDK interfaces with SPDX compliance.

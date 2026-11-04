@@ -17,7 +17,7 @@ class TestCLIExecution(unittest.TestCase):
                 main()
             self.assertEqual(ctx.exception.code, 0)
             output = out.getvalue()
-            self.assertIn("termux-llama", output)
+            self.assertIn("amv-llama", output)
             self.assertIn("serve", output)
             self.assertIn("download", output)
             self.assertIn("find", output)

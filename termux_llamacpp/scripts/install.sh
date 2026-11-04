@@ -7,12 +7,12 @@
 set -euo pipefail
 
 if [ -z "${TERMUX_LLAMACPP_VERSION:-}" ]; then
-    VERSION="$(curl -sL https://api.github.com/repos/uno-km/termux-llamacpp/releases/latest 2>/dev/null | grep '"tag_name":' | head -n 1 | cut -d '"' -f 4 | sed 's/^v//')"
+    VERSION="$(curl -sL https://api.github.com/repos/uno-km/amv-llamacpp/releases/latest 2>/dev/null | grep '"tag_name":' | head -n 1 | cut -d '"' -f 4 | sed 's/^v//')"
     VERSION="${VERSION:-latest}"
 else
     VERSION="${TERMUX_LLAMACPP_VERSION}"
 fi
-REPO="uno-km/termux-llamacpp"
+REPO="uno-km/amv-llamacpp"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 MODELS_DIR="$XDG_CACHE_HOME/termux-llamacpp/models"
@@ -251,29 +251,35 @@ printf '  [termux-llamacpp] Synchronizing Python & Node.js ecosystem packages...
 if command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
     PY_CMD="python3"
     command -v python3 >/dev/null 2>&1 || PY_CMD="python"
-    INSTALLED_VER="$($PY_CMD -c 'import termux_llamacpp; print(termux_llamacpp.__version__)' 2>/dev/null || true)"
-    if [ -n "$INSTALLED_VER" ]; then
-        printf '  [Python] Verified existing termux-llamacpp v%s. Preserving local package.\n' "$INSTALLED_VER"
+    # The package was renamed termux-llamacpp -> amv-llamacpp. Both install the same termux_llamacpp module,
+    # so the old distribution is removed first; otherwise its files and the new ones overwrite each other.
+    if $PY_CMD -m pip show amv-llamacpp >/dev/null 2>&1; then
+        INSTALLED_VER="$($PY_CMD -m pip show amv-llamacpp 2>/dev/null | sed -n 's/^Version: //p')"
+        printf '  [Python] Verified existing amv-llamacpp v%s. Preserving local package.\n' "$INSTALLED_VER"
     else
-        printf '  [Python] Detected Python environment. Provisioning termux-llamacpp via pip...\n'
-        $PY_CMD -m pip install termux-llamacpp --no-cache-dir >/dev/null 2>&1 || {
-            $PY_CMD -m pip install termux-llamacpp >/dev/null 2>&1 || printf '  [Python] Notice: pip install skipped (managed environment or offline).\n'
+        if $PY_CMD -m pip show termux-llamacpp >/dev/null 2>&1; then
+            printf '  [Python] Removing the previous package name termux-llamacpp (renamed to amv-llamacpp)...\n'
+            $PY_CMD -m pip uninstall -y termux-llamacpp >/dev/null 2>&1 || printf '  [Python] Notice: could not uninstall termux-llamacpp.\n'
+        fi
+        printf '  [Python] Detected Python environment. Provisioning amv-llamacpp via pip...\n'
+        $PY_CMD -m pip install amv-llamacpp --no-cache-dir >/dev/null 2>&1 || {
+            $PY_CMD -m pip install amv-llamacpp >/dev/null 2>&1 || printf '  [Python] Notice: pip install skipped (managed environment or offline).\n'
         }
     fi
 fi
 
 # 2. Node.js npm Package Auto-Install
 if command -v npm >/dev/null 2>&1; then
-    printf '  [Node.js] Detected Node.js environment. Provisioning termux-llamacpp via npm...\n'
-    npm install -g termux-llamacpp --force >/dev/null 2>&1 || {
-        npm install -g termux-llamacpp >/dev/null 2>&1 || printf '  [Node.js] Notice: npm install skipped (offline).\n'
+    printf '  [Node.js] Detected Node.js environment. Provisioning amv-llamacpp via npm...\n'
+    npm install -g amv-llamacpp --force >/dev/null 2>&1 || {
+        npm install -g amv-llamacpp >/dev/null 2>&1 || printf '  [Node.js] Notice: npm install skipped (offline).\n'
     }
 fi
 
 printf '================================================================================\n'
 printf '  [termux-llamacpp] Complete Installation & Dual-Ecosystem Sync Completed!\n'
 printf '  Version       : %s\n' "$VERSION"
-printf '  CLI Binaries  : %s/bin/llama-cli, %s/bin/llama-server, %s/bin/termux-llama\n' "$PREFIX" "$PREFIX" "$PREFIX"
+printf '  CLI Binaries  : %s/bin/llama-cli, %s/bin/llama-server, %s/bin/amv-llama\n' "$PREFIX" "$PREFIX" "$PREFIX"
 printf '  Libraries     : %s/lib/*.so\n' "$PREFIX"
 printf '  Models Root   : %s\n' "$MODELS_DIR"
 printf '  Ecosystem     : Python SDK (pip) + Node.js CLI (npm) + Pure CPU ARM64 Engine\n'

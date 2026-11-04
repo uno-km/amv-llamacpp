@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """termux-llamacpp: Universal GGUF Runtime, Model Manager & OpenAI Server for Android Termux & ARM64."""
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 from termux_llamacpp.config import (
     RuntimeConfig,
@@ -43,7 +43,7 @@ from termux_llamacpp.exceptions import (
 )
 
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 __author__ = "uno-km"
 
 __all__ = [
