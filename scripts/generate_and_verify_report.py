@@ -150,7 +150,7 @@ amv_llamacpp-1.0.0b1.dist-info/RECORD
 ## 4. 유닛 테스트 실행 증적 (Automated Test Evidence - 34 Tests)
 
 ```text
-PS C:\\Users\\GAME\\Desktop\\uno-km\\dev\\amv-llamacpp> py -3 -m unittest discover -s tests -p 'test_*.py'
+PS> py -3 -m unittest discover -s tests -p 'test_*.py'
 .................................127.0.0.1 - - [27/Aug/2026 00:53:06] "GET /health HTTP/1.1" 200 -
 127.0.0.1 - - [27/Aug/2026 00:53:06] "POST /v1/chat/completions HTTP/1.1" 400 -
 127.0.0.1 - - [27/Aug/2026 00:53:06] "GET /invalid_route HTTP/1.1" 404 -
