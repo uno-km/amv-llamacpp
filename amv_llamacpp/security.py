@@ -17,8 +17,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Set, Union
 
-from termux_llamacpp.config import TRUST_DIR, LLAMA_CPP_PINNED_COMMIT
-from termux_llamacpp.exceptions import TermuxLlamaError, SecurityVerificationError
+from amv_llamacpp.config import TRUST_DIR, LLAMA_CPP_PINNED_COMMIT
+from amv_llamacpp.exceptions import TermuxLlamaError, SecurityVerificationError
 
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 _COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
@@ -625,7 +625,7 @@ def normalize_loopback_origin(origin: str) -> Optional[str]:
 
 
 def verify_file_sha256(file_path: Union[str, Path], expected_sha256: str, chunk_size: int = 1024 * 1024) -> bool:
-    """Standard Unified SHA-256 Checksum Verifier for termux-llamacpp."""
+    """Standard Unified SHA-256 Checksum Verifier for amv-llamacpp."""
     p = Path(file_path)
     if not p.is_file() or not expected_sha256:
         return False

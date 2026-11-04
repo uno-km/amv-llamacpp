@@ -5,7 +5,7 @@ import sys
 from unittest.mock import patch, MagicMock
 import pytest
 
-from termux_llamacpp.cluster import (
+from amv_llamacpp.cluster import (
     parse_cluster_rpc_spec,
     resolve_auto_tensor_split,
     verify_rpc_cluster_nodes,
@@ -13,12 +13,12 @@ from termux_llamacpp.cluster import (
     check_cluster_license,
     setup_cluster_guard_tunnels,
 )
-from termux_llamacpp.exceptions import (
+from amv_llamacpp.exceptions import (
     ClusterConnectionError,
     ClusterConfigurationError,
     ClusterLicenseRequiredError,
 )
-from termux_llamacpp.engine import LlamaRuntime
+from amv_llamacpp.engine import LlamaRuntime
 
 
 def test_parse_cluster_rpc_spec():
@@ -61,7 +61,7 @@ def test_check_cluster_license_with_invalid_token():
 def test_resolve_auto_tensor_split():
     mock_orch = MagicMock()
     mock_orch.resolve_auto_tensor_split.return_value = (["192.0.2.10:50052", "192.0.2.11:50052"], "38,33,29")
-    with patch.dict(sys.modules, {"termux_ai_orchestrator.auto_split": mock_orch}):
+    with patch.dict(sys.modules, {"amv_ai_orchestrator.auto_split": mock_orch}):
         servers, ts = resolve_auto_tensor_split("192.0.2.10:50052,192.0.2.11:50052", "auto")
         assert servers == ["192.0.2.10:50052", "192.0.2.11:50052"]
         assert ts == "38,33,29"
@@ -98,10 +98,10 @@ def test_engine_generate_rpc_with_license_and_tunnels(tmp_path):
     mock_tunnel = MagicMock()
     mock_tunnel.local_port = 51052
 
-    with patch("termux_llamacpp.engine.resolve_device_backend", return_value=("cpu", 0)), \
-         patch("termux_llamacpp.cluster.check_cluster_license"), \
-         patch("termux_llamacpp.cluster.verify_rpc_cluster_nodes"), \
-         patch("termux_llamacpp.cluster.setup_cluster_guard_tunnels", return_value=(["127.0.0.1:51052"], [mock_tunnel])), \
+    with patch("amv_llamacpp.engine.resolve_device_backend", return_value=("cpu", 0)), \
+         patch("amv_llamacpp.cluster.check_cluster_license"), \
+         patch("amv_llamacpp.cluster.verify_rpc_cluster_nodes"), \
+         patch("amv_llamacpp.cluster.setup_cluster_guard_tunnels", return_value=(["127.0.0.1:51052"], [mock_tunnel])), \
          patch("subprocess.run") as mock_run:
         mock_proc = MagicMock()
         mock_proc.returncode = 0

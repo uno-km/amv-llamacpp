@@ -4,7 +4,7 @@ import re
 import hashlib
 from pathlib import Path
 
-report_path = Path("termux-llamacpp-full-source-and-report.md")
+report_path = Path("amv-llamacpp-full-source-and-report.md")
 content = report_path.read_text(encoding="utf-8")
 
 # Extract fenced code blocks

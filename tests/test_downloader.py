@@ -7,10 +7,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from termux_llamacpp.downloader import ModelManager
-from termux_llamacpp.security import compute_sha256
-from termux_llamacpp.exceptions import ModelNotFoundError
-from termux_llamacpp.config import CURATED_MODELS
+from amv_llamacpp.downloader import ModelManager
+from amv_llamacpp.security import compute_sha256
+from amv_llamacpp.exceptions import ModelNotFoundError
+from amv_llamacpp.config import CURATED_MODELS
 
 
 class TestModelManager(unittest.TestCase):
@@ -29,11 +29,11 @@ class TestModelManager(unittest.TestCase):
 
         err_msg = str(ctx.exception)
         self.assertIn("MODEL NOT FOUND", err_msg)
-        self.assertIn("termux-llama download", err_msg)
+        self.assertIn("amv-llama download", err_msg)
 
     def test_unspecified_model_raises_model_not_specified_error(self):
         """Test that empty or None model identifier raises ModelNotSpecifiedError (Zero-Silent-Fallback)."""
-        from termux_llamacpp.exceptions import ModelNotSpecifiedError
+        from amv_llamacpp.exceptions import ModelNotSpecifiedError
         with self.assertRaises(ModelNotSpecifiedError):
             self.manager.resolve_model_path(None)
         with self.assertRaises(ModelNotSpecifiedError):
@@ -71,7 +71,7 @@ class TestModelManager(unittest.TestCase):
 
     def test_license_acceptance_required(self):
         """Test that downloading models requiring acceptance without accept_license=True raises TermuxLlamaError."""
-        from termux_llamacpp.exceptions import TermuxLlamaError
+        from amv_llamacpp.exceptions import TermuxLlamaError
         with self.assertRaises(TermuxLlamaError) as ctx:
             self.manager.download("llama-3.2-1b-instruct", accept_license=False)
         self.assertIn("requires accepting its community license", str(ctx.exception))

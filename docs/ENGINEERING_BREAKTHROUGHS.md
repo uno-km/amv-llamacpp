@@ -1,10 +1,10 @@
-# 🏆 termux-llamacpp: Android Termux 온디바이스 LLM 런타임 기술 혁신 및 난제 해결 백서 (Engineering Breakthroughs Report)
+# 🏆 amv-llamacpp: Android Termux 온디바이스 LLM 런타임 기술 혁신 및 난제 해결 백서 (Engineering Breakthroughs Report)
 
 ## 📌 개요 및 배경
 
 온디바이스 AI(On-Device AI) 환경, 특히 모바일 Android/Termux(ARM64) 생태계는 일반 데스크톱/서버 Linux와 달리 고유한 Bionic libc 제약, 권한 분리, 낮은 메모리 대역폭 및 제한된 CPU 코어 자원을 가집니다.
 
-본 프로젝트(`termux-llamacpp`)는 기존 대기업 및 오픈소스 커뮤니티가 직면했던 **설치 실패, 보안 차단, 디스크 I/O 병목, 데몬 프로세스 조기 종료** 등의 4대 기술적 난제를 완벽히 해결하고, 순수 스마트폰(Samsung Galaxy S20 / Snapdragon 865)에서 **Qwen2.5 1.5B 모델을 초당 13~14토큰으로 실시간 스트리밍 추론**하는 프로덕션 엔지니어링 표준을 확립하였습니다.
+본 프로젝트(`amv-llamacpp`)는 기존 대기업 및 오픈소스 커뮤니티가 직면했던 **설치 실패, 보안 차단, 디스크 I/O 병목, 데몬 프로세스 조기 종료** 등의 4대 기술적 난제를 완벽히 해결하고, 순수 스마트폰(Samsung Galaxy S20 / Snapdragon 865)에서 **Qwen2.5 1.5B 모델을 초당 13~14토큰으로 실시간 스트리밍 추론**하는 프로덕션 엔지니어링 표준을 확립하였습니다.
 
 ---
 
@@ -15,7 +15,7 @@
 * **혁신 조치**:
   1. `cryptography`를 하드 의존성에서 옵셔널(`[project.optional-dependencies]`)로 분리하고, 코어 런타임을 순수 Python 표준 라이브러리(`urllib`, `http.server`, `hashlib`, `hmac`) 기반의 Zero-Dependency 구조로 재설계.
   2. 시스템 레벨에서 필요 시 `pkg install -y python-cryptography`를 자동 감지 및 호출하는 자가 치유 폴백(Self-Healing Fallback) 구현.
-  3. **결과**: `pip install termux-llamacpp` 및 `npm install -g termux-llamacpp` 원터치 무오류 설치 100% 달성.
+  3. **결과**: `pip install amv-llamacpp` 및 `npm install -g amv-llamacpp` 원터치 무오류 설치 100% 달성.
 
 ---
 
@@ -42,7 +42,7 @@
 * **혁신 조치**:
   1. `start_new_session=True`로 터미널 세션과 완벽히 격리된 독립 데몬 프로세스를 스폰.
   2. 모델이 완전히 적재되어 `/health` 응답이 `200 OK`가 될 때까지 터미널에 실시간 프로그레스 애니메이션(`[*] Warmup in progress (Elapsed: Xs) ...`)을 출력하며, `Ctrl+C` 입력 시 즉시 안전하게 회수.
-  3. 프록시 업스트림 타임아웃을 **300초**로 확장하고, `termux-llama stop` 공식 CLI 명령어 제공.
+  3. 프록시 업스트림 타임아웃을 **300초**로 확장하고, `amv-llama stop` 공식 CLI 명령어 제공.
 ### 5. Qualcomm Adreno Vulkan 가속 결함 및 포렌식 (Adreno 830 수치 파괴 & Adreno 650 크래시)
 * **문제점 (문제 현상)**:
   1. **Galaxy S25 (Adreno 830)**: Vulkan 추론 시 프롬프트 20.6 t/s, 생성 22.5~45.5 t/s로 극히 빠르나, Qwen 모델은 `@` 무한 반복, Llama 모델은 `uşуры表...` 외계어 토큰으로 Logits가 일괄 붕괴(Collapse)되어 수치 오염 발생. (CPU 구동 시에는 정상 출력되어 GPU 커널 문제로 규명)
@@ -58,7 +58,7 @@
 
 ```text
 ================================================================================
-  [termux-llamacpp] Real-Device Verification Telemetry (ARM64 Snapdragon 865)
+  [amv-llamacpp] Real-Device Verification Telemetry (ARM64 Snapdragon 865)
 ================================================================================
   Target Model          : Qwen 2.5 1.5B Instruct (Q4_K_M GGUF / 1.1 GB)
   Warmup Time (mmap)    : 3.0초
@@ -74,6 +74,6 @@
 
 ## 📦 공식 배포 채널
 
-* **PyPI (Python)**: [`https://pypi.org/project/termux-llamacpp/1.0.2/`](https://pypi.org/project/termux-llamacpp/1.0.2/)
-* **npm (Node.js)**: [`https://www.npmjs.com/package/termux-llamacpp`](https://www.npmjs.com/package/termux-llamacpp) (v1.0.2)
-* **GitHub Repository**: [`https://github.com/uno-km/termux-llamacpp`](https://github.com/uno-km/termux-llamacpp) (Tag: `v1.0.2`)
+* **PyPI (Python)**: [`https://pypi.org/project/amv-llamacpp/1.0.2/`](https://pypi.org/project/amv-llamacpp/1.0.2/)
+* **npm (Node.js)**: [`https://www.npmjs.com/package/amv-llamacpp`](https://www.npmjs.com/package/amv-llamacpp) (v1.0.2)
+* **GitHub Repository**: [`https://github.com/uno-km/amv-llamacpp`](https://github.com/uno-km/amv-llamacpp) (Tag: `v1.0.2`)

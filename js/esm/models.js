@@ -57,7 +57,7 @@ exports.CURATED_MODELS = {
 class ModelManager {
     modelsDir;
     constructor(modelsDir) {
-        const baseDir = process.env.TERMUX_LLAMA_HOME || node_path_1.default.join(node_os_1.default.homedir(), ".termux-llama");
+        const baseDir = process.env.TERMUX_LLAMA_HOME || node_path_1.default.join(node_os_1.default.homedir(), ".amv-llama");
         this.modelsDir = modelsDir || process.env.TERMUX_LLAMA_MODELS_DIR || node_path_1.default.join(baseDir, "models");
         if (!node_fs_1.default.existsSync(this.modelsDir)) {
             node_fs_1.default.mkdirSync(this.modelsDir, { recursive: true });
@@ -104,18 +104,18 @@ class ModelManager {
         }
         const destination = node_path_1.default.join(this.modelsDir, filename);
         if (node_fs_1.default.existsSync(destination)) {
-            console.log(`[termux-llamacpp] Model '${filename}' is already downloaded at ${destination}`);
+            console.log(`[amv-llamacpp] Model '${filename}' is already downloaded at ${destination}`);
             return destination;
         }
         const downloadUrl = `https://huggingface.co/${repoId}/resolve/main/${filename}`;
-        console.log(`[termux-llamacpp] Downloading ${filename} from ${downloadUrl}...`);
+        console.log(`[amv-llamacpp] Downloading ${filename} from ${downloadUrl}...`);
         const response = await fetch(downloadUrl);
         if (!response.ok) {
             throw new Error(`Failed to download model from ${downloadUrl}: ${response.statusText}`);
         }
         const buffer = Buffer.from(await response.arrayBuffer());
         node_fs_1.default.writeFileSync(destination, buffer);
-        console.log(`[termux-llamacpp] Model saved to ${destination}`);
+        console.log(`[amv-llamacpp] Model saved to ${destination}`);
         return destination;
     }
     listLocalModels() {

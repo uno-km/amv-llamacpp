@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Union, List, Dict, Any
 
-logger = logging.getLogger("termux_llamacpp.engine")
+logger = logging.getLogger("amv_llamacpp.engine")
 
 @dataclass
 class VLMResponse:
@@ -27,16 +27,16 @@ class VLMResponse:
     raw_stdout: str = ""
     raw_stderr: str = ""
 
-from termux_llamacpp.config import (
+from amv_llamacpp.config import (
     RuntimeConfig,
     DEFAULT_BIN_DIR,
     DEFAULT_MODELS_DIR,
     LLAMA_CPP_PINNED_COMMIT,
 )
-from termux_llamacpp.downloader import ModelManager
-from termux_llamacpp.crawler import HuggingFaceCrawler
-from termux_llamacpp.hardware import detect_hardware, HardwareProfile, resolve_device_backend, is_adreno_vulkan
-from termux_llamacpp.exceptions import (
+from amv_llamacpp.downloader import ModelManager
+from amv_llamacpp.crawler import HuggingFaceCrawler
+from amv_llamacpp.hardware import detect_hardware, HardwareProfile, resolve_device_backend, is_adreno_vulkan
+from amv_llamacpp.exceptions import (
     RuntimeBuildError,
     TermuxLlamaError,
 )
@@ -49,11 +49,11 @@ def ensure_system_dependencies() -> None:
         import cryptography
     except ImportError:
         if shutil.which("pkg"):
-            print("[termux-llamacpp] Auto-installing precompiled 'python-cryptography' via Termux pkg...")
+            print("[amv-llamacpp] Auto-installing precompiled 'python-cryptography' via Termux pkg...")
             try:
                 subprocess.run(["pkg", "install", "-y", "python-cryptography"], check=True)
             except Exception as e:
-                print(f"[termux-llamacpp] Notice: Failed to auto-install python-cryptography via pkg: {e}")
+                print(f"[amv-llamacpp] Notice: Failed to auto-install python-cryptography via pkg: {e}")
 
     # ameva-runtime is an optional hardware HAL, not auto-installed at runtime
     pass
@@ -105,7 +105,7 @@ class LlamaRuntime:
 
         mode_desc = "Building from source" if force_rebuild else "Installing prebuilt native binaries"
         print("================================================================================")
-        print(f"  [termux-llamacpp] {mode_desc} (Commit: {self.config.pinned_commit})")
+        print(f"  [amv-llamacpp] {mode_desc} (Commit: {self.config.pinned_commit})")
         print(f"  Preset: {self.config.preset}")
         print("================================================================================")
 
@@ -295,12 +295,12 @@ class LlamaRuntime:
         daemon: bool = False,
     ):
         """
-        Start an OpenAI and termux-aichain compliant server instance using the resolved model.
+        Start an OpenAI and amv-aichain compliant server instance using the resolved model.
 
         Raises:
             ModelNotFoundError: If the model file is not found.
         """
-        from termux_llamacpp.server import ServerManager
+        from amv_llamacpp.server import ServerManager
 
         resolved_model_path = self.models.get(model)
         server_mgr = ServerManager(runtime=self)
@@ -364,7 +364,7 @@ class LlamaRuntime:
         # Cluster resolution and pre-flight validation
         cluster_tunnels = []
         if rpc:
-            from termux_llamacpp.cluster import (
+            from amv_llamacpp.cluster import (
                 ensure_wakelock,
                 check_cluster_license,
                 setup_cluster_guard_tunnels,
@@ -394,9 +394,9 @@ class LlamaRuntime:
             raise RuntimeBuildError(
                 f"Binary '{cli_bin_name}' not found in '{self.bin_dir}' or PATH.\n"
                 f"Please install or compile the runtime first by running:\n"
-                f"  termux-llama install\n"
+                f"  amv-llama install\n"
                 f"Or in Python:\n"
-                f"  from termux_llamacpp import LlamaRuntime; LlamaRuntime.install()"
+                f"  from amv_llamacpp import LlamaRuntime; LlamaRuntime.install()"
             )
 
         t_count = str(threads or self.hw.recommended_threads)
@@ -571,7 +571,7 @@ class LlamaRuntime:
         if not cli_bin:
             raise RuntimeBuildError(
                 f"Binary '{cli_bin_name}' not found in '{self.bin_dir}' or PATH.\n"
-                f"Please compile the runtime via: termux-llama install"
+                f"Please compile the runtime via: amv-llama install"
             )
 
         t_count = str(threads or self.hw.recommended_threads)

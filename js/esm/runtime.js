@@ -20,11 +20,11 @@ class LlamaRuntime {
     }
     static async install(options = {}) {
         const pyCmd = process.env.PYTHON || "python3";
-        const args = ["-m", "termux_llamacpp", "install"];
+        const args = ["-m", "amv_llamacpp", "install"];
         if (options.preset) {
             args.push("--preset", options.preset);
         }
-        console.log(`[termux-llamacpp] Executing runtime installation (preset: ${options.preset || "android-arm64-baseline"})...`);
+        console.log(`[amv-llamacpp] Executing runtime installation (preset: ${options.preset || "android-arm64-baseline"})...`);
         await new Promise((resolve, reject) => {
             const child = (0, node_child_process_1.spawn)(pyCmd, args, { stdio: "inherit", env: process.env });
             child.on("error", (err) => reject(err));

@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
-termux_llamacpp.control.component
+amv_llamacpp.control.component
 AMEVA Component Protocol v1 — LlamaCppControl
 
 단일 진실 원천: 이 클래스가 CLI / 상태파일 Writer / Orchestrator Adapter 모두의 상태 제공.
@@ -39,22 +39,22 @@ from ameva_component.control import ComponentControl
 
 class LlamaCppControl(ComponentControl):
     """
-    termux-llamacpp ComponentControl.
+    amv-llamacpp ComponentControl.
 
     기존 LlamaRuntime / ModelManager / ServerManager를 Adapter로 연결합니다.
     실제 서버 프로세스 PID, 모델 캐시 상태, Instance 상태를 모두
     상태 파일 및 Registry에서 읽습니다.
     """
 
-    COMPONENT_ID   = "termux-llamacpp"
+    COMPONENT_ID   = "amv-llamacpp"
     COMPONENT_TYPE = "llm"
     CAPABILITIES   = ("llm.chat", "llm.completion")
     # embedding.generate는 llama.cpp 빌드 옵션에 따라 다르므로 기본 비포함
 
     # 기존 ModelManager 기본 모델 디렉터리
-    DEFAULT_MODELS_DIR = Path.home() / ".termux-llama" / "models"
+    DEFAULT_MODELS_DIR = Path.home() / ".amv-llama" / "models"
     # ServerManager PID 파일 위치 (server.py DEFAULT_RUN_DIR 참조)
-    DEFAULT_RUN_DIR    = Path.home() / ".termux-llama" / "run"
+    DEFAULT_RUN_DIR    = Path.home() / ".amv-llama" / "run"
 
     def __init__(
         self,
@@ -69,13 +69,13 @@ class LlamaCppControl(ComponentControl):
         self._act_lock   = ActivationLock()
 
         # Phase 4: Heartbeat Writer
-        from termux_llamacpp.control.status import LlamaCppStatusWriter
+        from amv_llamacpp.control.status import LlamaCppStatusWriter
         self._heartbeat = LlamaCppStatusWriter(self)
 
-        # 기존 ModelManager는 선택적 import (termux-llamacpp 자체 내에서만 사용)
+        # 기존 ModelManager는 선택적 import (amv-llamacpp 자체 내에서만 사용)
         self._model_manager: Any = None
         try:
-            from termux_llamacpp.downloader import ModelManager
+            from amv_llamacpp.downloader import ModelManager
             self._model_manager = ModelManager(str(self._models_dir))
         except Exception as e:
             log_stderr(f"[llamacpp] ModelManager import failed (non-fatal): {e}")
@@ -98,7 +98,7 @@ class LlamaCppControl(ComponentControl):
 
     def _get_version(self) -> str:
         try:
-            from termux_llamacpp import __version__
+            from amv_llamacpp import __version__
             return __version__
         except Exception:
             return "1.2.1"
@@ -289,7 +289,7 @@ class LlamaCppControl(ComponentControl):
         # 하드웨어 진단 추가 (기존 hardware.py 활용)
         hw_info = {}
         try:
-            from termux_llamacpp.hardware import detect_hardware
+            from amv_llamacpp.hardware import detect_hardware
             hw = detect_hardware()
             hw_info = hw.__dict__ if hasattr(hw, "__dict__") else {"info": str(hw)}
         except Exception as e:

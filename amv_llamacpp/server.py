@@ -18,11 +18,11 @@ from pathlib import Path
 from typing import Optional, Union, Dict, Any, List, Callable
 import threading
 
-logger = logging.getLogger("termux_llamacpp.server")
+logger = logging.getLogger("amv_llamacpp.server")
 
 import requests
 
-from termux_llamacpp.config import (
+from amv_llamacpp.config import (
     ServerConfig,
     PROTOCOL_VERSION,
     DEFAULT_PUBLIC_PORT,
@@ -31,8 +31,8 @@ from termux_llamacpp.config import (
     DEFAULT_LOG_DIR,
     LLAMA_CPP_PINNED_COMMIT,
 )
-from termux_llamacpp.exceptions import ServerStartupError, TermuxLlamaError
-from termux_llamacpp.security import (
+from amv_llamacpp.exceptions import ServerStartupError, TermuxLlamaError
+from amv_llamacpp.security import (
     compute_sha256,
     verify_binary_pre_execution,
     verify_model_pre_execution,
@@ -220,10 +220,10 @@ class ProcessIdentityLock:
         try:
             if self.lock_file.is_file():
                 self.lock_file.unlink(missing_ok=True)
-                logger.warning("[termux-llamacpp] Purged orphaned stale lock file: %s", self.lock_file)
+                logger.warning("[amv-llamacpp] Purged orphaned stale lock file: %s", self.lock_file)
             return self.try_acquire()
         except OSError as e:
-            logger.error("[termux-llamacpp] Failed to purge stale lock file '%s': %s", self.lock_file, e)
+            logger.error("[amv-llamacpp] Failed to purge stale lock file '%s': %s", self.lock_file, e)
             return False
 
     def try_acquire(self) -> bool:
@@ -590,10 +590,10 @@ class ServerInstance:
 
     def stop(self):
         if not self.is_owned:
-            print(f"[termux-llamacpp] Detaching from attached server on {self.endpoint} (Process preserved).")
+            print(f"[amv-llamacpp] Detaching from attached server on {self.endpoint} (Process preserved).")
             return
 
-        print(f"[termux-llamacpp] Terminating owned server on {self.endpoint}...")
+        print(f"[amv-llamacpp] Terminating owned server on {self.endpoint}...")
         if self.proxy_httpd and hasattr(self.proxy_httpd, "runtime_state"):
             self.proxy_httpd.runtime_state.is_ready = False
 
@@ -634,7 +634,7 @@ class ServerInstance:
         if self.lock_manager:
             self.lock_manager.release()
 
-        print("[termux-llamacpp] Server supervisor stopped successfully.")
+        print("[amv-llamacpp] Server supervisor stopped successfully.")
 
     def __enter__(self):
         return self
@@ -729,7 +729,7 @@ class ServerManager:
         if not server_bin or not server_bin.is_file():
             raise ServerStartupError(
                 f"Verified llama-server binary is unavailable. "
-                f"Please run 'termux-llama install' to build the pinned native runtime."
+                f"Please run 'amv-llama install' to build the pinned native runtime."
             )
 
         # Pre-Execution Binary Validation with Trust Level Result
@@ -747,7 +747,7 @@ class ServerManager:
         if not self.lock_mgr.try_acquire():
             existing_meta = self.lock_mgr.read_metadata()
             if self.lock_mgr.is_stale():
-                print(f"[termux-llamacpp] Detected orphaned stale lock on {public_endpoint}. Auto-reclaiming lock...")
+                print(f"[amv-llamacpp] Detected orphaned stale lock on {public_endpoint}. Auto-reclaiming lock...")
                 if not self.lock_mgr.reclaim_stale_lock():
                     raise ServerStartupError(f"Failed to reclaim stale lock file on {public_endpoint}.")
             elif existing_meta:
@@ -798,7 +798,7 @@ class ServerManager:
                                 and health_data.get("model", {}).get("id") == model_id
                                 and health_data.get("model", {}).get("sha256") == model_sha256
                             ):
-                                print(f"[termux-llamacpp] Attaching to healthy VERIFIED instance on {public_endpoint}...")
+                                print(f"[amv-llamacpp] Attaching to healthy VERIFIED instance on {public_endpoint}...")
                                 return ServerInstance(
                                     public_host=public_host,
                                     public_port=public_port,
@@ -836,14 +836,14 @@ class ServerManager:
         self.lock_mgr.write_metadata(lock_meta)
 
         print("================================================================================")
-        print("  [termux-llamacpp] Launching Reverse Proxy Server Supervisor")
+        print("  [amv-llamacpp] Launching Reverse Proxy Server Supervisor")
         print("================================================================================")
         print(f"  Model ID        : {model_id}")
         print(f"  Artifact File   : {model_path.name}")
         print(f"  Public Endpoint : {public_endpoint}")
         print(f"  Native Endpoint : {native_endpoint} (Loopback)")
         print(f"  Binary Trust    : {binary_verification.trust_level.value}")
-        print(f"  Protocol Version: {PROTOCOL_VERSION} (termux-aichain compliant)")
+        print(f"  Protocol Version: {PROTOCOL_VERSION} (amv-aichain compliant)")
         print("================================================================================")
 
         runtime_state = RuntimeState(
@@ -942,7 +942,7 @@ class ServerManager:
             )
 
             time.sleep(0.1)
-            print(f"[termux-llamacpp] Reverse Proxy active and ready at {public_endpoint}")
+            print(f"[amv-llamacpp] Reverse Proxy active and ready at {public_endpoint}")
             return instance
 
         except Exception as exc:

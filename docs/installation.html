@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Installation Guide | termux-llamacpp</title>
-    <meta name="description" content="Install termux-llamacpp and compile native llama.cpp">
+    <title>Installation Guide | amv-llamacpp</title>
+    <meta name="description" content="Install amv-llamacpp and compile native llama.cpp">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <script src="i18n-translations.js"></script>
@@ -13,8 +13,8 @@
 <body>
     <header>
         <a href="index.html" class="header-brand">
-            <img src="favicon.svg" alt="termux-llamacpp Logo">
-            <h1 data-i18n="common.brand">termux-llamacpp</h1>
+            <img src="favicon.svg" alt="amv-llamacpp Logo">
+            <h1 data-i18n="common.brand">amv-llamacpp</h1>
         </a>
         <div class="header-controls">
             <span class="release-tag">v1.0.0 (GGUF Runtime)</span>
@@ -28,8 +28,8 @@
                     <option value="de">🇩🇪 Deutsch</option>
                 </select>
             </div>
-            <a href="https://pypi.org/project/termux-llamacpp/" target="_blank" class="header-btn">PyPI (pip)</a>
-            <a href="https://github.com/uno-km/termux-llamacpp" target="_blank" class="header-btn primary">GitHub</a>
+            <a href="https://pypi.org/project/amv-llamacpp/" target="_blank" class="header-btn">PyPI (pip)</a>
+            <a href="https://github.com/uno-km/amv-llamacpp" target="_blank" class="header-btn primary">GitHub</a>
         </div>
     </header>
     <div class="container">
@@ -59,24 +59,24 @@
             <p class="subtitle">Quick setup across Python, Node.js, and Android Termux.</p>
 
             <h3>1. Install SDK &amp; CLI via pip</h3>
-            <pre><code class="language-bash">pip install termux-llamacpp</code></pre>
+            <pre><code class="language-bash">pip install amv-llamacpp</code></pre>
 
             <h3>2. Compile Native ARM64 llama.cpp Runtime</h3>
             <pre><code class="language-bash"># Standard safe baseline (armv8-a)
-termux-llama install --preset android-arm64-baseline
+amv-llama install --preset android-arm64-baseline
 
 # Hardware accelerated (if device supports DotProd)
-termux-llama install --preset android-arm64-dotprod</code></pre>
+amv-llama install --preset android-arm64-dotprod</code></pre>
 
             <h3>3. Diagnostics</h3>
-            <pre><code class="language-bash">termux-llama doctor</code></pre>
+            <pre><code class="language-bash">amv-llama doctor</code></pre>
         </main>
     </div>
     <footer>
         <div style="margin-bottom: 8px;">
-            <strong>Disclaimer:</strong> termux-llamacpp is an independent open-source project and is not affiliated with or endorsed by Meta Platforms, Inc. or the Termux project.
+            <strong>Disclaimer:</strong> amv-llamacpp is an independent open-source project and is not affiliated with or endorsed by Meta Platforms, Inc. or the Termux project.
         </div>
-        <span>&copy; 2026 termux-llamacpp Project (uno-km). Released under Apache License 2.0.</span>
+        <span>&copy; 2026 amv-llamacpp Project (uno-km). Released under Apache License 2.0.</span>
     </footer>
 </body>
 </html>

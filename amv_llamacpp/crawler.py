@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
-"""Hugging Face GGUF Discovery Engine with Optional termux-playwright Scraper."""
+"""Hugging Face GGUF Discovery Engine with Optional amv-playwright Scraper."""
 
 import json
 import logging
@@ -10,9 +10,9 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 import requests
 
-logger = logging.getLogger("termux_llamacpp.crawler")
+logger = logging.getLogger("amv_llamacpp.crawler")
 
-from termux_llamacpp.exceptions import DependencyMissingError, TermuxLlamaError
+from amv_llamacpp.exceptions import DependencyMissingError, TermuxLlamaError
 
 
 @dataclass
@@ -34,14 +34,14 @@ class HuggingFaceCrawler:
 
     def __init__(self, hf_token: Optional[str] = None):
         self.hf_token = hf_token or os.environ.get("HF_TOKEN")
-        self.headers = {"User-Agent": "termux-llamacpp/1.0.0 (ARM64 Android)"}
+        self.headers = {"User-Agent": "amv-llamacpp/1.0.0 (ARM64 Android)"}
         if self.hf_token:
             self.headers["Authorization"] = f"Bearer {self.hf_token}"
 
     def check_playwright_installed(self) -> bool:
-        """Check whether termux-playwright (or standard playwright) is installed."""
+        """Check whether amv-playwright (or standard playwright) is installed."""
         try:
-            import termux_playwright  # type: ignore
+            import amv_playwright  # type: ignore
             return True
         except ImportError:
             try:
@@ -62,16 +62,16 @@ class HuggingFaceCrawler:
         Args:
             query: Search keyword (e.g. 'qwen2.5 gguf', 'llama 3.2 gguf').
             limit: Maximum number of models to return.
-            deep_crawl: If True, uses termux-playwright to render model pages and extract full file trees.
+            deep_crawl: If True, uses amv-playwright to render model pages and extract full file trees.
 
         Raises:
-            DependencyMissingError: If deep_crawl is True but termux-playwright is not installed.
+            DependencyMissingError: If deep_crawl is True but amv-playwright is not installed.
         """
         if deep_crawl:
             if not self.check_playwright_installed():
                 self._print_playwright_warning()
                 raise DependencyMissingError(
-                    package_name="termux-playwright",
+                    package_name="amv-playwright",
                     reason="Hugging Face 동적 페이지 렌더링 및 심층 GGUF 파일 테이블 크롤링"
                 )
             return self._deep_crawl_with_playwright(query, limit)
@@ -79,14 +79,14 @@ class HuggingFaceCrawler:
         return self._rest_api_search(query, limit)
 
     def _print_playwright_warning(self):
-        """Print prominent CLI warning banner when termux-playwright is absent."""
+        """Print prominent CLI warning banner when amv-playwright is absent."""
         print("\n" + "=" * 80)
-        print(" [termux-llamacpp] DEPENDENCY WARNING: termux-playwright is not installed!")
+        print(" [amv-llamacpp] DEPENDENCY WARNING: amv-playwright is not installed!")
         print("=" * 80)
-        print(" Hugging Face 동적 페이지 렌더링 및 심층 GGUF 파일 크롤링을 위해 termux-playwright가 필요합니다.\n")
+        print(" Hugging Face 동적 페이지 렌더링 및 심층 GGUF 파일 크롤링을 위해 amv-playwright가 필요합니다.\n")
         print(" 다음 명령어를 실행하여 설치하십시오:")
-        print("   [Python]  pip install termux-playwright")
-        print("   [Node.js] npm install termux-playwright\n")
+        print("   [Python]  pip install amv-playwright")
+        print("   [Node.js] npm install amv-playwright\n")
         print(" 일반 REST API 검색 모드를 사용하려면 deep_crawl=False 옵션으로 재시도하십시오.")
         print("=" * 80 + "\n")
 
@@ -173,7 +173,7 @@ class HuggingFaceCrawler:
             try:
                 rec_file, quant_types = self._resolve_repo_gguf_files(repo_id)
             except Exception as resolve_err:
-                print(f"[termux-llamacpp] Info: Skipping repository '{repo_id}' ({resolve_err})")
+                print(f"[amv-llamacpp] Info: Skipping repository '{repo_id}' ({resolve_err})")
                 continue
 
             download_url = f"https://huggingface.co/{repo_id}/resolve/main/{rec_file}"
@@ -195,13 +195,13 @@ class HuggingFaceCrawler:
         return results
 
     def _deep_crawl_with_playwright(self, query: str, limit: int) -> List[DiscoveredGGUFModel]:
-        """Execute headless browser scraping via termux-playwright and resolve real file trees."""
+        """Execute headless browser scraping via amv-playwright and resolve real file trees."""
         try:
             from playwright.sync_api import sync_playwright  # type: ignore
         except ImportError:
-            from termux_playwright.sync_api import sync_playwright  # type: ignore
+            from amv_playwright.sync_api import sync_playwright  # type: ignore
 
-        print(f"[termux-llamacpp] Launching termux-playwright headless browser for deep crawl: '{query}'...")
+        print(f"[amv-llamacpp] Launching amv-playwright headless browser for deep crawl: '{query}'...")
         results: List[DiscoveredGGUFModel] = []
 
         with sync_playwright() as p:
@@ -232,7 +232,7 @@ class HuggingFaceCrawler:
                             pipeline_tag="text-generation",
                             recommended_file=rec_file,
                             download_url=download_url,
-                            description="Deep crawled via termux-playwright",
+                            description="Deep crawled via amv-playwright",
                             quant_types=quant_types,
                         )
                     )

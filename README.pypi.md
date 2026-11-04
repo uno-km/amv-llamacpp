@@ -1,21 +1,21 @@
-# Termux-LlamaCpp (Python)
+# AMV-LlamaCpp (Python)
 
-[![PyPI](https://img.shields.io/pypi/v/termux-llamacpp.svg?style=flat-square&color=0369a1)](https://pypi.org/project/termux-llamacpp/)
-[![Python](https://img.shields.io/pypi/pyversions/termux-llamacpp.svg?style=flat-square)](https://pypi.org/project/termux-llamacpp/)
-[![License](https://img.shields.io/badge/License-Apache_2.0-004499.svg?style=flat-square)](https://github.com/uno-km/termux-llamacpp)
+[![PyPI](https://img.shields.io/pypi/v/amv-llamacpp.svg?style=flat-square&color=0369a1)](https://pypi.org/project/amv-llamacpp/)
+[![Python](https://img.shields.io/pypi/pyversions/amv-llamacpp.svg?style=flat-square)](https://pypi.org/project/amv-llamacpp/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-004499.svg?style=flat-square)](https://github.com/uno-km/amv-llamacpp)
 
 > Production-Grade GGUF LLM Runtime Utilizing Device Resources, Model Manager & OpenAI Server for Android ARM64
 
 ## Installation
 
 ```bash
-pip install termux-llamacpp
+pip install amv-llamacpp
 ```
 
 ## Quickstart
 
 ```python
-from termux_llamacpp import LlamaRuntime, RuntimeConfig
+from amv_llamacpp import LlamaRuntime, RuntimeConfig
 
 # 1. Initialize Runtime with Vulkan GPU Acceleration
 config = RuntimeConfig(
@@ -37,7 +37,7 @@ Ships verified Android ARM64 native binaries with bundled shared libraries and d
 
 ## Documentation
 - [Official Documentation & API Reference](https://uno-km.vercel.app/lib/llamacpp/)
-- [GitHub Repository](https://github.com/uno-km/termux-llamacpp)
+- [GitHub Repository](https://github.com/uno-km/amv-llamacpp)
 
 ## License
 Apache-2.0 License. Copyright (c) 2026 Eunho Kim (@uno-km).

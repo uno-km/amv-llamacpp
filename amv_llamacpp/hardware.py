@@ -11,7 +11,7 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
 
-logger = logging.getLogger("termux_llamacpp.hardware")
+logger = logging.getLogger("amv_llamacpp.hardware")
 
 # [B방안] Platform SSOT: ameva-runtime.platform 에서 공유 구현을 가져옵니다.
 # ameva-runtime 미설치 환경(개발 호스트 등)에서는 인라인 fallback 을 사용합니다.
@@ -125,7 +125,7 @@ def _read_hwcap_features() -> Dict[str, bool]:
                 features["dotprod"] = True
             return features
         except Exception as e:
-            logger.debug("[termux-llamacpp] getauxval HWCAP reading failed: %s", e)
+            logger.debug("[amv-llamacpp] getauxval HWCAP reading failed: %s", e)
 
     return features
 
@@ -143,7 +143,7 @@ def _read_cpuinfo_features() -> Dict[str, bool]:
             features["fp16"] = "fp16" in content or "fphp" in content or "asimdhp" in content
             features["dotprod"] = "dotprod" in content or "asimddp" in content
     except Exception as e:
-        logger.debug("[termux-llamacpp] /proc/cpuinfo reading failed: %s", e)
+        logger.debug("[amv-llamacpp] /proc/cpuinfo reading failed: %s", e)
 
     return features
 
@@ -183,7 +183,7 @@ def _get_memory_info() -> tuple[Optional[float], Optional[float]]:
             if total_mb is not None and avail_mb is not None:
                 return total_mb, avail_mb
         except Exception as e:
-            logger.debug("[termux-llamacpp] /proc/meminfo read failed: %s", e)
+            logger.debug("[amv-llamacpp] /proc/meminfo read failed: %s", e)
 
     # 2. Windows GlobalMemoryStatusEx via ctypes
     if sys.platform == "win32":
@@ -206,7 +206,7 @@ def _get_memory_info() -> tuple[Optional[float], Optional[float]]:
             if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat)):
                 return stat.ullTotalPhys / (1024.0 * 1024.0), stat.ullAvailPhys / (1024.0 * 1024.0)
         except Exception as e:
-            logger.debug("[termux-llamacpp] Windows memory detection failed: %s", e)
+            logger.debug("[amv-llamacpp] Windows memory detection failed: %s", e)
 
     # 3. macOS / POSIX sysconf
     if hasattr(os, "sysconf"):
@@ -217,7 +217,7 @@ def _get_memory_info() -> tuple[Optional[float], Optional[float]]:
                 tot = (phys_pages * page_size) / (1024.0 * 1024.0)
                 return tot, tot * 0.5
         except (ValueError, OSError) as e:
-            logger.debug("[termux-llamacpp] POSIX sysconf memory detection failed: %s", e)
+            logger.debug("[amv-llamacpp] POSIX sysconf memory detection failed: %s", e)
 
     # No fake fallback metrics: return actual None if undetectable
     return total_mb, avail_mb
@@ -268,7 +268,7 @@ def print_hardware_summary(hw: Optional[HardwareProfile] = None):
         hw = detect_hardware()
 
     print("================================================================================")
-    print("  termux-llamacpp Hardware & System Profile")
+    print("  amv-llamacpp Hardware & System Profile")
     print("================================================================================")
     print(f"  Architecture        : {hw.arch} (ARM64: {hw.is_arm64})")
     print(f"  Android / Termux    : Android={hw.is_android}, Termux={hw.is_termux}")
@@ -333,12 +333,12 @@ def _require_gpu_runtime(requested_device: str) -> None:
     Every explicit GPU request goes through here. There is no CPU fallback: the caller gets
     RuntimeRequiredError and the CLI exits with status 69.
     """
-    from termux_llamacpp.exceptions import RuntimeRequiredError
+    from amv_llamacpp.exceptions import RuntimeRequiredError
     try:
         from ameva_device import AmevaRuntimeRequiredError, require_ameva_runtime
     except ImportError as exc:
         raise RuntimeRequiredError(
-            "[AMU_ERR_RUNTIME_REQUIRED] termux-llamacpp: GPU execution (device='%s') needs ameva-runtime (AMUDA), "
+            "[AMU_ERR_RUNTIME_REQUIRED] amv-llamacpp: GPU execution (device='%s') needs ameva-runtime (AMUDA), "
             "and the shared check library 'ameva-device-sdk' is missing from this installation.\n"
             "Nothing was run, and no CPU fallback was used.\n"
             "Install:\n"
@@ -349,7 +349,7 @@ def _require_gpu_runtime(requested_device: str) -> None:
         ) from exc
     try:
         require_ameva_runtime(
-            "termux-llamacpp", "GPU execution (device='%s')" % requested_device,
+            "amv-llamacpp", "GPU execution (device='%s')" % requested_device,
             min_version=GPU_RUNTIME_MIN_VERSION,
         )
     except AmevaRuntimeRequiredError as exc:
@@ -359,7 +359,7 @@ def _require_gpu_runtime(requested_device: str) -> None:
 def _note_cpu_instead(reason: str) -> None:
     """auto mode: say on stderr that the GPU was not used, so the CPU run is never silent."""
     import sys
-    sys.stderr.write("[termux-llamacpp] GPU not used: %s. This run uses the CPU. "
+    sys.stderr.write("[amv-llamacpp] GPU not used: %s. This run uses the CPU. "
                      "To enable the GPU: pip install ameva-runtime (https://github.com/uno-km/ameva-runtime-releases)\n" % reason)
     sys.stderr.flush()
 
@@ -381,7 +381,7 @@ def resolve_device_backend(requested_device: str, requested_ngl: Optional[int] =
               - If GPU is unavailable, auto-routes to pure CPU ('cpu', 0).
     """
     import sys
-    from termux_llamacpp.exceptions import TermuxLlamaError
+    from amv_llamacpp.exceptions import TermuxLlamaError
 
     req = str(requested_device or "auto").lower().strip()
     ameva_mod = _resolve_ameva_runtime()

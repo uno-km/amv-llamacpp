@@ -1,3 +1,17 @@
+# v2.0.0 (2026-11-04) — Python import name follows the amv-llamacpp package name
+
+### Changed
+- The Python package is now `amv_llamacpp` (previously `termux_llamacpp`). Code, CLI entry points, scripts, docs and cross-package references use the amv-* names.
+- `import termux_llamacpp` keeps working through a deprecated alias that returns the same module objects and emits a `DeprecationWarning`. The alias will be removed in a future major release.
+
+### Unchanged
+- On-disk cache and data directories (for example `~/.cache/termux-*`) keep their names, so models already downloaded on devices stay in use.
+- Termux platform commands (`termux-tts-speak`, `termux-wake-lock`, `termux-api`, ...) keep their names.
+- Release asset names (`termux-llamacpp-<target>.tar.gz`) and the release signing key id are unchanged. The installer still removes the old `termux-llamacpp` distribution before installing.
+- The installer now links `amv-llama-cli` / `amv-llama-server` (previously `termux-llama-cli` / `termux-llama-server`).
+
+---
+
 # v1.5.1 (2026-11-04) — Installer follows the amv-llamacpp package name
 
 ### Fixed

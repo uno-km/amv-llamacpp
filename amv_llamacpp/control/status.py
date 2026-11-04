@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
-termux_llamacpp.control.status
+amv_llamacpp.control.status
 AMEVA Component Protocol v1 — 상태 파일 Writer + 10초 Heartbeat
 
 갱신 트리거:

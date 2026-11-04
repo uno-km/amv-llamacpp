@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
-"""Command line interface for termux-llamacpp."""
+"""Command line interface for amv-llamacpp."""
 
 import argparse
 import logging
@@ -12,27 +12,27 @@ import time
 from pathlib import Path
 import requests
 
-logger = logging.getLogger("termux_llamacpp.cli")
+logger = logging.getLogger("amv_llamacpp.cli")
 
-from termux_llamacpp import __version__
-from termux_llamacpp.engine import LlamaRuntime
-from termux_llamacpp.downloader import ModelManager
-from termux_llamacpp.crawler import HuggingFaceCrawler
-from termux_llamacpp.hardware import detect_hardware, print_hardware_summary
-from termux_llamacpp.config import CURATED_MODELS, BUILD_PRESETS, LLAMA_CPP_PINNED_COMMIT
-from termux_llamacpp.exceptions import (
+from amv_llamacpp import __version__
+from amv_llamacpp.engine import LlamaRuntime
+from amv_llamacpp.downloader import ModelManager
+from amv_llamacpp.crawler import HuggingFaceCrawler
+from amv_llamacpp.hardware import detect_hardware, print_hardware_summary
+from amv_llamacpp.config import CURATED_MODELS, BUILD_PRESETS, LLAMA_CPP_PINNED_COMMIT
+from amv_llamacpp.exceptions import (
     ModelNotFoundError,
     ModelNotSpecifiedError,
     InvalidModelIdentifierError,
     DependencyMissingError,
     TermuxLlamaError,
 )
-from termux_llamacpp.exceptions import RuntimeRequiredError
+from amv_llamacpp.exceptions import RuntimeRequiredError
 
 
 def cmd_install(args):
     """Execute native runtime toolchain setup and full prebuilt binary/library overwrite."""
-    print(f"[termux-llama] Installing native runtime with preset '{args.preset}' (Pinned Commit: {LLAMA_CPP_PINNED_COMMIT})...")
+    print(f"[amv-llama] Installing native runtime with preset '{args.preset}' (Pinned Commit: {LLAMA_CPP_PINNED_COMMIT})...")
     try:
         runtime = LlamaRuntime.install(
             preset=args.preset,
@@ -40,7 +40,7 @@ def cmd_install(args):
             force_reinstall=True,
             from_source=getattr(args, "from_source", False),
         )
-        print(f"[termux-llama] Native runtime installation completed successfully.")
+        print(f"[amv-llama] Native runtime installation completed successfully.")
     except RuntimeRequiredError:
         raise
     except Exception as e:
@@ -60,7 +60,7 @@ def cmd_download(args):
             accept_license=getattr(args, "accept_license", False),
             force=args.force,
         )
-        print(f"[termux-llama] Successfully downloaded to: {path}")
+        print(f"[amv-llama] Successfully downloaded to: {path}")
     except RuntimeRequiredError:
         raise
     except TermuxLlamaError as e:
@@ -69,13 +69,13 @@ def cmd_download(args):
 
 
 def cmd_serve(args):
-    """Start OpenAI and termux-aichain compliant server."""
+    """Start OpenAI and amv-aichain compliant server."""
     if getattr(args, "daemon", False):
         import shutil
         py_bin = sys.executable or "python3"
         cmd = [
             py_bin,
-            "-m", "termux_llamacpp",
+            "-m", "amv_llamacpp",
             "serve",
             str(args.model),
             "--host", str(args.host),
@@ -85,7 +85,7 @@ def cmd_serve(args):
         if args.threads is not None:
             cmd.extend(["--threads", str(args.threads)])
 
-        log_dir = Path.home() / ".termux-llama" / "logs"
+        log_dir = Path.home() / ".amv-llama" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "daemon.log"
         log_handle = open(log_file, "a", encoding="utf-8")
@@ -100,14 +100,14 @@ def cmd_serve(args):
         proc = subprocess.Popen(cmd, **popen_kwargs)
 
         print("================================================================================")
-        print(f"  [termux-llamacpp] Launching Background Server Daemon (PID: {proc.pid})")
+        print(f"  [amv-llamacpp] Launching Background Server Daemon (PID: {proc.pid})")
         print("================================================================================")
         print(f"  Endpoint : http://{args.host}:{args.port}")
         print(f"  Log File : {log_file}")
         print("================================================================================")
 
         endpoint = f"http://{args.host}:{args.port}"
-        print(f"[termux-llama] Loading model & initializing server at {endpoint}...")
+        print(f"[amv-llama] Loading model & initializing server at {endpoint}...")
         dots = [".", "..", "...", "....", "....."]
         ready = False
         start_time = time.time()
@@ -136,7 +136,7 @@ def cmd_serve(args):
                 except Exception as exc:
                     logger.debug("Health probe error during warmup: %s", exc)
         except KeyboardInterrupt:
-            print("\n\n[termux-llama] Initialization cancelled by user. Terminating server...")
+            print("\n\n[amv-llama] Initialization cancelled by user. Terminating server...")
             try:
                 proc.terminate()
             except OSError as term_err:
@@ -146,10 +146,10 @@ def cmd_serve(args):
 
         print()  # newline
         if ready:
-            print(f"[termux-llama] Server is ACTIVE and READY on {endpoint} (PID: {proc.pid})")
+            print(f"[amv-llama] Server is ACTIVE and READY on {endpoint} (PID: {proc.pid})")
         else:
-            print(f"[termux-llama] Background server launched (PID: {proc.pid}). Check logs at {log_file}")
-        print("[termux-llama] Use 'termux-llama stop' to stop server.\n")
+            print(f"[amv-llama] Background server launched (PID: {proc.pid}). Check logs at {log_file}")
+        print("[amv-llama] Use 'amv-llama stop' to stop server.\n")
         return
 
     runtime = LlamaRuntime()
@@ -170,11 +170,11 @@ def cmd_serve(args):
             device=effective_device,
             n_gpu_layers=getattr(args, "ngl", 0) or 0,
         )
-        print(f"\n[termux-llama] Server running at {server.endpoint} (Ctrl+C to stop)")
+        print(f"\n[amv-llama] Server running at {server.endpoint} (Ctrl+C to stop)")
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n[termux-llama] Stopping server...")
+        print("\n[amv-llama] Stopping server...")
     except RuntimeRequiredError:
         raise
     except TermuxLlamaError as e:
@@ -216,7 +216,7 @@ def cmd_run(args):
     if not prompt_val:
         print(
             f"[Error] Input prompt is required.\n"
-            f"Usage: termux-llama run {model_val} \"<prompt>\" or termux-llama run {model_val} -p \"<prompt>\"",
+            f"Usage: amv-llama run {model_val} \"<prompt>\" or amv-llama run {model_val} -p \"<prompt>\"",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -260,12 +260,12 @@ def cmd_run(args):
 
 
 def cmd_stop(args):
-    """Stop running termux-llama server instances via tracked PID files without collateral pkill."""
+    """Stop running amv-llama server instances via tracked PID files without collateral pkill."""
     import signal
-    from termux_llamacpp.config import DEFAULT_RUN_DIR
-    from termux_llamacpp.server import ProcessIdentityLock
+    from amv_llamacpp.config import DEFAULT_RUN_DIR
+    from amv_llamacpp.server import ProcessIdentityLock
 
-    print("[termux-llama] Stopping running server instance via tracked PID ledger...")
+    print("[amv-llama] Stopping running server instance via tracked PID ledger...")
     stopped_count = 0
 
     # 1. Read ProcessIdentityLock metadata
@@ -298,10 +298,10 @@ def cmd_stop(args):
     for pid in target_pids:
         try:
             os.kill(pid, signal.SIGTERM)
-            print(f"[termux-llama] Sent SIGTERM to tracked server process (PID: {pid}).")
+            print(f"[amv-llama] Sent SIGTERM to tracked server process (PID: {pid}).")
             stopped_count += 1
         except (ProcessLookupError, PermissionError) as e:
-            print(f"[termux-llama] PID {pid} is not running or already terminated: {e}")
+            print(f"[amv-llama] PID {pid} is not running or already terminated: {e}")
 
     # 4. Clean up state
     if lock_mgr.lock_file.exists():
@@ -309,24 +309,24 @@ def cmd_stop(args):
             lock_mgr.lock_file.unlink(missing_ok=True)
             logger.debug("Cleaned up lock file: %s", lock_mgr.lock_file)
         except OSError as e:
-            logger.warning("[termux-llamacpp] Failed to remove lock file (%s): %s", lock_mgr.lock_file, e)
+            logger.warning("[amv-llamacpp] Failed to remove lock file (%s): %s", lock_mgr.lock_file, e)
     if pid_file.exists():
         try:
             pid_file.unlink(missing_ok=True)
             logger.debug("Cleaned up PID file: %s", pid_file)
         except OSError as e:
-            logger.warning("[termux-llamacpp] Failed to remove PID file (%s): %s", pid_file, e)
+            logger.warning("[amv-llamacpp] Failed to remove PID file (%s): %s", pid_file, e)
 
     if stopped_count > 0:
-        print(f"[termux-llama] Stopped {stopped_count} tracked server process(es).")
+        print(f"[amv-llama] Stopped {stopped_count} tracked server process(es).")
     else:
-        print("[termux-llama] No active tracked server instances found.")
+        print("[amv-llama] No active tracked server instances found.")
 
 
 def cmd_find(args):
     """Search for GGUF models on Hugging Face."""
     crawler = HuggingFaceCrawler()
-    print(f"[termux-llama] Searching Hugging Face for '{args.query}' (deep_crawl={args.deep})...")
+    print(f"[amv-llama] Searching Hugging Face for '{args.query}' (deep_crawl={args.deep})...")
     try:
         results = crawler.discover(
             query=args.query,
@@ -334,7 +334,7 @@ def cmd_find(args):
             deep_crawl=args.deep,
         )
         if not results:
-            print("[termux-llama] No models found.")
+            print("[amv-llama] No models found.")
             return
 
         print(f"\nFound {len(results)} GGUF models:\n")
@@ -369,7 +369,7 @@ def cmd_list(args):
     manager = ModelManager()
     models = manager.list_local_models()
     if not models:
-        print(f"[termux-llama] No cached GGUF models found in {manager.models_dir} or ecosystem paths.")
+        print(f"[amv-llama] No cached GGUF models found in {manager.models_dir} or ecosystem paths.")
         return
 
     print(f"\nCached GGUF Models ({len(models)}):\n")
@@ -392,7 +392,7 @@ def cmd_curated(args):
         ram_str = f"{info.min_ram_mb} MB" if hasattr(info, "min_ram_mb") and info.min_ram_mb > 0 else "-"
         repo = getattr(info, "repo_id", "")
         print(f"{alias:<26} {size_str:<10} {ram_str:<10} {repo}")
-    print("\nTo download, run: termux-llama download <alias>\n")
+    print("\nTo download, run: amv-llama download <alias>\n")
 
 
 def cmd_presets(args):
@@ -418,7 +418,7 @@ def main():
     A GPU request without a usable ameva-runtime ends here with the shared explanation on stderr
     and exit status 69, whichever sub-command raised it.
     """
-    from termux_llamacpp.exceptions import RuntimeRequiredError
+    from amv_llamacpp.exceptions import RuntimeRequiredError
     try:
         return _main_impl()
     except RuntimeRequiredError as err:
@@ -461,7 +461,7 @@ def _main_impl():
     p_download.add_argument("--force", action="store_true", help="Force re-download")
 
     # serve
-    p_serve = subparsers.add_parser("serve", help="Start OpenAI/termux-aichain server")
+    p_serve = subparsers.add_parser("serve", help="Start OpenAI/amv-aichain server")
     p_serve.add_argument("model", nargs="?", default=None, help="Model filename, alias, or direct path (default: first cached model)")
     p_serve.add_argument("--host", default="127.0.0.1", help="Host address (default: 127.0.0.1)")
     p_serve.add_argument("--port", type=int, default=8080, help="Port (default: 8080)")
@@ -497,13 +497,13 @@ def _main_impl():
 
 
     # stop
-    subparsers.add_parser("stop", help="Stop all running termux-llama server instances")
+    subparsers.add_parser("stop", help="Stop all running amv-llama server instances")
 
     # find
     p_find = subparsers.add_parser("find", help="Discover GGUF models on Hugging Face")
     p_find.add_argument("query", nargs="?", default="gguf", help="Search keyword")
     p_find.add_argument("--limit", type=int, default=10, help="Max results")
-    p_find.add_argument("--deep", action="store_true", help="Use termux-playwright (P2 optional)")
+    p_find.add_argument("--deep", action="store_true", help="Use amv-playwright (P2 optional)")
 
     # list
     subparsers.add_parser("list", help="List downloaded GGUF models in cache")
@@ -553,7 +553,7 @@ def _main_impl():
         elif args.command in ("component", "model", "instance") and _protocol_available:
             # AMEVA Component Protocol v1 명령 처리
             from ameva_component.cli_support import dispatch_protocol
-            from termux_llamacpp.control import LlamaCppControl
+            from amv_llamacpp.control import LlamaCppControl
             control = LlamaCppControl()
             dispatch_protocol(args, control)
         elif args.command in ("component", "model", "instance"):

@@ -1,12 +1,12 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
-"""Unit tests for Hugging Face crawler and termux-playwright dependency checking."""
+"""Unit tests for Hugging Face crawler and amv-playwright dependency checking."""
 
 import unittest
 from unittest.mock import patch
 
-from termux_llamacpp.crawler import HuggingFaceCrawler
-from termux_llamacpp.exceptions import DependencyMissingError
+from amv_llamacpp.crawler import HuggingFaceCrawler
+from amv_llamacpp.exceptions import DependencyMissingError
 
 
 class TestHuggingFaceCrawler(unittest.TestCase):
@@ -21,8 +21,8 @@ class TestHuggingFaceCrawler(unittest.TestCase):
 
             err = str(ctx.exception)
             self.assertIn("DEPENDENCY MISSING", err)
-            self.assertIn("pip install termux-playwright", err)
-            self.assertIn("npm install termux-playwright", err)
+            self.assertIn("pip install amv-playwright", err)
+            self.assertIn("npm install amv-playwright", err)
 
     def test_resolve_repo_gguf_files_from_siblings(self):
         """Verify that _resolve_repo_gguf_files parses siblings and picks optimal quantization."""

@@ -22,7 +22,7 @@ export class HuggingFaceCrawler {
 
   public async isPlaywrightAvailable(): Promise<boolean> {
     try {
-      await import("termux-playwright");
+      await import("amv-playwright");
       return true;
     } catch {
       try {
@@ -42,7 +42,7 @@ export class HuggingFaceCrawler {
     if (deepCrawl) {
       const available = await this.isPlaywrightAvailable();
       if (!available) {
-        throw new DependencyMissingError("termux-playwright", "Hugging Face 동적 페이지 렌더링 및 심층 GGUF 파일 크롤링");
+        throw new DependencyMissingError("amv-playwright", "Hugging Face 동적 페이지 렌더링 및 심층 GGUF 파일 크롤링");
       }
       // If available, perform dynamic crawling
     }
@@ -55,7 +55,7 @@ export class HuggingFaceCrawler {
     url.searchParams.set("limit", String(limit));
 
     const headers: Record<string, string> = {
-      "User-Agent": "termux-llamacpp-js/1.0.0"
+      "User-Agent": "amv-llamacpp-js/1.0.0"
     };
     if (this.hfToken) {
       headers["Authorization"] = `Bearer ${this.hfToken}`;

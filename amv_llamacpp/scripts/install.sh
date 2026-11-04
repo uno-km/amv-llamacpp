@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 # ==============================================================================
-# termux-llamacpp: Production Prebuilt Zero-Compilation Installer for Termux ARM64
+# amv-llamacpp: Production Prebuilt Zero-Compilation Installer for Termux ARM64
 # ==============================================================================
 set -euo pipefail
 
@@ -17,7 +17,7 @@ PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 MODELS_DIR="$XDG_CACHE_HOME/termux-llamacpp/models"
 ARCH="$(uname -m)"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/termux-llamacpp-inst.XXXXXXXX")"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/amv-llamacpp-inst.XXXXXXXX")"
 FROM_SOURCE=0
 
 cleanup() {
@@ -58,7 +58,7 @@ for arg in "$@"; do
 done
 
 printf '================================================================================\n'
-printf '  [termux-llamacpp] Universal Installer v%s\n' "$VERSION"
+printf '  [amv-llamacpp] Universal Installer v%s\n' "$VERSION"
 printf '================================================================================\n'
 printf '  Architecture : %s\n' "$ARCH"
 printf '  Binary Target: %s/bin\n' "$PREFIX"
@@ -78,14 +78,14 @@ mkdir -p "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/share/termux-llamacpp" "$MODELS_DI
 # ==============================================================================
 if [ "$FROM_SOURCE" = "1" ]; then
     PRESET="${TERMUX_LLAMA_PRESET:-android-arm64-baseline}"
-    printf '  [termux-llamacpp] Installing build toolchain prerequisites (Preset: %s)...\n' "$PRESET"
+    printf '  [amv-llamacpp] Installing build toolchain prerequisites (Preset: %s)...\n' "$PRESET"
 
     # Base compiler toolchain
     pkg install -y git clang cmake ninja pkg-config || true
 
     PINNED_COMMIT="5e6a37cb115dc1074e274ac004373f5661909695"
     UPSTREAM_URL="https://github.com/ggerganov/llama.cpp.git"
-    BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/termux-llamacpp-src.XXXXXXXX")"
+    BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/amv-llamacpp-src.XXXXXXXX")"
     cleanup_src() { rm -rf -- "$BUILD_DIR"; }
     trap cleanup_src EXIT INT TERM HUP
 
@@ -132,10 +132,10 @@ EOF
     done
 
     # Create standard native aliases in $PREFIX/bin (isolated from Python CLI)
-    ln -sf "$PREFIX/bin/llama-cli" "$PREFIX/bin/termux-llama-cli"
-    ln -sf "$PREFIX/bin/llama-server" "$PREFIX/bin/termux-llama-server"
+    ln -sf "$PREFIX/bin/llama-cli" "$PREFIX/bin/amv-llama-cli"
+    ln -sf "$PREFIX/bin/llama-server" "$PREFIX/bin/amv-llama-server"
 
-    printf '  [termux-llamacpp] Source compilation and verified installation complete.\n'
+    printf '  [amv-llamacpp] Source compilation and verified installation complete.\n'
 fi
 
 # ==============================================================================
@@ -146,7 +146,7 @@ if [ "$FROM_SOURCE" != "1" ]; then
     if [ "$DEDICATE" = "1" ] && [ -L "$PREFIX/bin/llama-cli" ]; then
         REAL_TARGET="$(readlink -f "$PREFIX/bin/llama-cli" 2>/dev/null || realpath "$PREFIX/bin/llama-cli" 2>/dev/null || echo "")"
         if echo "$REAL_TARGET" | grep -q "\.local/share/ameva"; then
-            printf '  [termux-llamacpp] [DEDICATE] AMEVA Runtime managed engine detected (%s). Preserving co-existence (<0.002s).\n' "$REAL_TARGET"
+            printf '  [amv-llamacpp] [DEDICATE] AMEVA Runtime managed engine detected (%s). Preserving co-existence (<0.002s).\n' "$REAL_TARGET"
             exit 0
         fi
     fi
@@ -154,7 +154,7 @@ if [ "$FROM_SOURCE" != "1" ]; then
     # "있어? 넘어가" - Skip if verified ELF binary already exists (<0.002s)
     if [ "$FORCE" != "1" ] && [ -x "$PREFIX/bin/llama-cli" ]; then
         if head -c 4 "$PREFIX/bin/llama-cli" 2>/dev/null | grep -q 'ELF'; then
-            printf '  [termux-llamacpp] [OK] Verified native ARM64 engine already present: %s/bin/llama-cli. Skipping download (<0.002s).\n' "$PREFIX"
+            printf '  [amv-llamacpp] [OK] Verified native ARM64 engine already present: %s/bin/llama-cli. Skipping download (<0.002s).\n' "$PREFIX"
             exit 0
         fi
     fi
@@ -175,7 +175,7 @@ if [ "$FROM_SOURCE" != "1" ]; then
     fi
 
     # 2. Minimal Runtime Tools Check
-    printf '  [termux-llamacpp] Checking minimal runtime prerequisites...\n'
+    printf '  [amv-llamacpp] Checking minimal runtime prerequisites...\n'
     MISSING_PKGS=""
     command -v curl >/dev/null 2>&1 || MISSING_PKGS="$MISSING_PKGS curl ca-certificates"
     command -v tar >/dev/null 2>&1 || MISSING_PKGS="$MISSING_PKGS tar"
@@ -197,11 +197,11 @@ if [ "$FROM_SOURCE" != "1" ]; then
     fi
 
     for CANDIDATE_URL in "${CANDIDATE_URLS[@]}"; do
-        printf '  [termux-llamacpp] Checking candidate release: %s\n' "$CANDIDATE_URL"
+        printf '  [amv-llamacpp] Checking candidate release: %s\n' "$CANDIDATE_URL"
         if curl -fL --retry 2 --retry-delay 1 --connect-timeout 10 -o "$TMP/$ASSET" "$CANDIDATE_URL" 2>/dev/null; then
             if [ -s "$TMP/$ASSET" ] && [ "$(wc -c < "$TMP/$ASSET")" -gt 1000000 ]; then
                 DOWNLOAD_SUCCESS=1
-                printf '  [termux-llamacpp] Successfully fetched prebuilt binary bundle from: %s\n' "$CANDIDATE_URL"
+                printf '  [amv-llamacpp] Successfully fetched prebuilt binary bundle from: %s\n' "$CANDIDATE_URL"
                 break
             fi
         fi
@@ -210,7 +210,7 @@ if [ "$FROM_SOURCE" != "1" ]; then
     if [ "$DOWNLOAD_SUCCESS" = "1" ]; then
         curl -fL --connect-timeout 5 -o "$TMP/$ASSET.sha256" "${CANDIDATE_URL}.sha256" 2>/dev/null || true
         if [ -s "$TMP/$ASSET.sha256" ]; then
-            printf '  [termux-llamacpp] Verifying cryptographic SHA-256 integrity...\n'
+            printf '  [amv-llamacpp] Verifying cryptographic SHA-256 integrity...\n'
             (cd "$TMP" && sha256sum -c "$ASSET.sha256") || fail "Cryptographic SHA-256 checksum mismatch!"
         fi
 
@@ -230,13 +230,13 @@ if [ "$FROM_SOURCE" != "1" ]; then
         chmod 0755 "$PREFIX/lib/"*.so* 2>/dev/null || true
 
         # Create standard native aliases in $PREFIX/bin (isolated from Python CLI)
-        ln -sf "$PREFIX/bin/llama-cli" "$PREFIX/bin/termux-llama-cli"
-        ln -sf "$PREFIX/bin/llama-server" "$PREFIX/bin/termux-llama-server"
+        ln -sf "$PREFIX/bin/llama-cli" "$PREFIX/bin/amv-llama-cli"
+        ln -sf "$PREFIX/bin/llama-server" "$PREFIX/bin/amv-llama-server"
 
         rm -rf "$STAGING"
-        printf '  [termux-llamacpp] Prebuilt binary bundle successfully installed into %s/bin and %s/lib.\n' "$PREFIX" "$PREFIX"
+        printf '  [amv-llamacpp] Prebuilt binary bundle successfully installed into %s/bin and %s/lib.\n' "$PREFIX" "$PREFIX"
     else
-        printf '  [termux-llamacpp] Prebuilt binary bundle unavailable. Falling back to native on-device compilation...\n'
+        printf '  [amv-llamacpp] Prebuilt binary bundle unavailable. Falling back to native on-device compilation...\n'
         "$0" --from-source
         exit 0
     fi
@@ -245,14 +245,15 @@ fi
 # ==============================================================================
 # Step 3: Python & Node.js Ecosystem Package Auto-Provisioning (pip & npm)
 # ==============================================================================
-printf '  [termux-llamacpp] Synchronizing Python & Node.js ecosystem packages...\n'
+printf '  [amv-llamacpp] Synchronizing Python & Node.js ecosystem packages...\n'
 
 # 1. Python pip Package Auto-Install
 if command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
     PY_CMD="python3"
     command -v python3 >/dev/null 2>&1 || PY_CMD="python"
-    # The package was renamed termux-llamacpp -> amv-llamacpp. Both install the same termux_llamacpp module,
-    # so the old distribution is removed first; otherwise its files and the new ones overwrite each other.
+    # The package was renamed termux-llamacpp -> amv-llamacpp. The old distribution ships a termux_llamacpp/
+    # directory, and amv-llamacpp 2.x ships the same directory as its deprecated import alias, so the old
+    # distribution is removed first; otherwise its files and the new ones overwrite each other.
     if $PY_CMD -m pip show amv-llamacpp >/dev/null 2>&1; then
         INSTALLED_VER="$($PY_CMD -m pip show amv-llamacpp 2>/dev/null | sed -n 's/^Version: //p')"
         printf '  [Python] Verified existing amv-llamacpp v%s. Preserving local package.\n' "$INSTALLED_VER"
@@ -277,7 +278,7 @@ if command -v npm >/dev/null 2>&1; then
 fi
 
 printf '================================================================================\n'
-printf '  [termux-llamacpp] Complete Installation & Dual-Ecosystem Sync Completed!\n'
+printf '  [amv-llamacpp] Complete Installation & Dual-Ecosystem Sync Completed!\n'
 printf '  Version       : %s\n' "$VERSION"
 printf '  CLI Binaries  : %s/bin/llama-cli, %s/bin/llama-server, %s/bin/amv-llama\n' "$PREFIX" "$PREFIX" "$PREFIX"
 printf '  Libraries     : %s/lib/*.so\n' "$PREFIX"

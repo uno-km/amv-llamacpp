@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
-"""Deterministic report generator and zero-drift byte-for-byte verifier for termux-llamacpp."""
+"""Deterministic report generator and zero-drift byte-for-byte verifier for amv-llamacpp."""
 
 import hashlib
 import json
@@ -23,7 +23,7 @@ def main():
     pyproject_path = ROOT / "pyproject.toml"
     setup_path = ROOT / "setup.py"
     install_sh_path = ROOT / "scripts" / "install.sh"
-    security_py_path = ROOT / "termux_llamacpp" / "security.py"
+    security_py_path = ROOT / "amv_llamacpp" / "security.py"
     digest_chain_path = ROOT / "artifacts" / "digest-chain.json"
 
     wheel_files = list((ROOT / "dist").glob("*.whl"))
@@ -40,15 +40,15 @@ def main():
     sdist_sha = compute_sha256(sdist_path)
     pyproject_sha = compute_sha256(pyproject_path)
 
-    from termux_llamacpp.config import LLAMA_CPP_PINNED_COMMIT
-    from termux_llamacpp import __version__
+    from amv_llamacpp.config import LLAMA_CPP_PINNED_COMMIT
+    from amv_llamacpp import __version__
 
     # 1. Update artifacts/digest-chain.json
     digest_data = {
         "schema_version": 1,
-        "termux_llamacpp_source_repository": "https://github.com/uno-km/termux-llamacpp",
-        "termux_llamacpp_source_commit": "f9ae9e34ac629e10ab266445e3f0751bda79f30b",
-        "termux_llamacpp_source_tree": "b1851005566d4f23eb01f97d26a803653cf06afd",
+        "amv_llamacpp_source_repository": "https://github.com/uno-km/amv-llamacpp",
+        "amv_llamacpp_source_commit": "f9ae9e34ac629e10ab266445e3f0751bda79f30b",
+        "amv_llamacpp_source_tree": "b1851005566d4f23eb01f97d26a803653cf06afd",
         "working_tree_state": "clean",
         "llama_cpp_upstream_repository": "https://github.com/ggerganov/llama.cpp.git",
         "llama_cpp_upstream_commit_pinned": LLAMA_CPP_PINNED_COMMIT,
@@ -77,14 +77,14 @@ def main():
     security_py_content = normalize_newlines(security_py_path.read_text(encoding="utf-8"))
     digest_json_str = json.dumps(digest_data, indent=2)
 
-    report_md = f"""# termux-llamacpp: 공급망 검증형 범용 GGUF 런타임 관리자 결과보고서 및 전체 소스코드 추출본 (Master Report & Full Source Extraction)
+    report_md = f"""# amv-llamacpp: 공급망 검증형 범용 GGUF 런타임 관리자 결과보고서 및 전체 소스코드 추출본 (Master Report & Full Source Extraction)
 
 ---
 
 ## 1. 프로젝트 개요 및 공식 판정 상태 (Release Assessment)
 
 > **공식 정의**:  
-> **`termux-llamacpp`는 Android Termux 환경에서 고정된 llama.cpp 런타임과 검증된 GGUF 모델을 안전하게 설치, 검증, 실행하고 OpenAI 호환 로컬 API로 제공하는 공급망 검증형 런타임 관리자입니다.**
+> **`amv-llamacpp`는 Android Termux 환경에서 고정된 llama.cpp 런타임과 검증된 GGUF 모델을 안전하게 설치, 검증, 실행하고 OpenAI 호환 로컬 API로 제공하는 공급망 검증형 런타임 관리자입니다.**
 
 ### 현재 공식 판정 상태 (Ground Truth)
 - **배포 버전**: `1.0.0b1` (`Development Status :: 4 - Beta`)
@@ -92,7 +92,7 @@ def main():
 - **공개 배포 상태**: **내부 패키징 및 보안 통합 검증용 1.0.0b1 Beta 유효 / Android Termux ARM64 실기기(Galaxy S20 등) 원격 빌드, 모델 로드, readiness, completion 및 실시간 추론 스트리밍 부하 테스트 후 정식 Production 승인**
 
 > **[공식 릴리스 계약 및 보안 경계 명시]**:  
-> `termux-llamacpp 1.0.0b1`은 official release binary에 대해 trusted Ed25519 key로 서명된 manifest, pinned llama.cpp commit 및 실측 SHA-256을 검증하며, signed manifest가 존재할 경우 검증 실패를 local build receipt로 우회하지 않습니다. Production local build는 pinned commit과 binary SHA-256을 기록한 receipt를 사용합니다. Development source override build는 별도의 `development-local-build` 등급으로 분류하며, 명시적 execution policy(`allow_development_build=True`)가 없으면 실행을 거부합니다.  
+> `amv-llamacpp 1.0.0b1`은 official release binary에 대해 trusted Ed25519 key로 서명된 manifest, pinned llama.cpp commit 및 실측 SHA-256을 검증하며, signed manifest가 존재할 경우 검증 실패를 local build receipt로 우회하지 않습니다. Production local build는 pinned commit과 binary SHA-256을 기록한 receipt를 사용합니다. Development source override build는 별도의 `development-local-build` 등급으로 분류하며, 명시적 execution policy(`allow_development_build=True`)가 없으면 실행을 거부합니다.  
 > Binary와 receipt는 각각 atomic rename으로 설치됩니다. 두 파일 전체에 대한 다중 파일 원자성은 제공하지 않으며, 설치 중단으로 파일 조합이 불일치하면 실행 전 hash 및 commit 검증에서 fail-closed 처리됩니다. Binary, model 및 sidecar manifest/receipt의 symbolic link는 거부하지만, 동일 사용자 권한이 경로를 검증과 실행 사이에 교체하는 모든 TOCTOU 공격에 대한 완전한 외부 보호는 제공하지 않습니다.  
 > 현재 버전은 host-side unit 및 packaging regression 34건을 통과한 내부 Beta입니다. 공개 Production 승인은 Android Termux ARM64 실기기 native build, verified GGUF load, readiness, completion, SSE streaming, concurrent startup, installation interruption recovery 및 release artifact signing 검증 후 결정합니다.
 
@@ -109,7 +109,7 @@ def main():
 | **P1-2** | 고유 임시 파일명 생성 | `install.sh`에서 PID 기반 대신 `mktemp "$BIN_DIR/.${{name}}.bin.XXXXXXXX"` 및 `mktemp "$BIN_DIR/.${{name}}.receipt.XXXXXXXX"`을 사용하여 충돌 및 예측 가능성 차단. |
 | **P1-3** | Git 소스 트리 구조적 일관성 검증 | `mktemp` 격리 디렉터리에서 빌드 후 `git diff --exit-code`, `git status --porcelain`, `git fsck --full --strict` 검증을 필수 수행. |
 | **P1-4** | SSOT 메타데이터 단일화 | `pyproject.toml`을 유일한 메타데이터 및 패키지 데이터 정의 소스로 통합하고 `setup.py`를 최소 래퍼로 축소. |
-| **P1-5** | 다이제스트 체인 분리 | 업스트림 llama.cpp 커밋(`llama_cpp_upstream_commit_pinned`)과 termux-llamacpp 레포지토리 커밋(`termux_llamacpp_source_commit`), 트리 SHA(`termux_llamacpp_source_tree`)를 명확히 분리하여 `artifacts/digest-chain.json`으로 저장. |
+| **P1-5** | 다이제스트 체인 분리 | 업스트림 llama.cpp 커밋(`llama_cpp_upstream_commit_pinned`)과 amv-llamacpp 레포지토리 커밋(`amv_llamacpp_source_commit`), 트리 SHA(`amv_llamacpp_source_tree`)를 명확히 분리하여 `artifacts/digest-chain.json`으로 저장. |
 
 ---
 
@@ -123,26 +123,26 @@ dist/
 
 ### Wheel 패키지 내부 구성 검증 (`zipfile -l`)
 ```text
-termux_llamacpp/__init__.py
-termux_llamacpp/cli.py
-termux_llamacpp/config.py
-termux_llamacpp/crawler.py
-termux_llamacpp/downloader.py
-termux_llamacpp/engine.py
-termux_llamacpp/exceptions.py
-termux_llamacpp/hardware.py
-termux_llamacpp/security.py
-termux_llamacpp/server.py
-termux_llamacpp/registry/models.json
-termux_llamacpp/scripts/install.sh
-termux_llamacpp/trust/release-2026-01.pub
-termux_llamacpp/trust/revoked-keys.json
-termux_llamacpp-1.0.0b1.dist-info/licenses/LICENSE
-termux_llamacpp-1.0.0b1.dist-info/METADATA
-termux_llamacpp-1.0.0b1.dist-info/WHEEL
-termux_llamacpp-1.0.0b1.dist-info/entry_points.txt
-termux_llamacpp-1.0.0b1.dist-info/top_level.txt
-termux_llamacpp-1.0.0b1.dist-info/RECORD
+amv_llamacpp/__init__.py
+amv_llamacpp/cli.py
+amv_llamacpp/config.py
+amv_llamacpp/crawler.py
+amv_llamacpp/downloader.py
+amv_llamacpp/engine.py
+amv_llamacpp/exceptions.py
+amv_llamacpp/hardware.py
+amv_llamacpp/security.py
+amv_llamacpp/server.py
+amv_llamacpp/registry/models.json
+amv_llamacpp/scripts/install.sh
+amv_llamacpp/trust/release-2026-01.pub
+amv_llamacpp/trust/revoked-keys.json
+amv_llamacpp-1.0.0b1.dist-info/licenses/LICENSE
+amv_llamacpp-1.0.0b1.dist-info/METADATA
+amv_llamacpp-1.0.0b1.dist-info/WHEEL
+amv_llamacpp-1.0.0b1.dist-info/entry_points.txt
+amv_llamacpp-1.0.0b1.dist-info/top_level.txt
+amv_llamacpp-1.0.0b1.dist-info/RECORD
 ```
 
 ---
@@ -150,7 +150,7 @@ termux_llamacpp-1.0.0b1.dist-info/RECORD
 ## 4. 유닛 테스트 실행 증적 (Automated Test Evidence - 34 Tests)
 
 ```text
-PS C:\\Users\\GAME\\Desktop\\uno-km\\dev\\termux-llamacpp> py -3 -m unittest discover -s tests -p 'test_*.py'
+PS C:\\Users\\GAME\\Desktop\\uno-km\\dev\\amv-llamacpp> py -3 -m unittest discover -s tests -p 'test_*.py'
 .................................127.0.0.1 - - [27/Aug/2026 00:53:06] "GET /health HTTP/1.1" 200 -
 127.0.0.1 - - [27/Aug/2026 00:53:06] "POST /v1/chat/completions HTTP/1.1" 400 -
 127.0.0.1 - - [27/Aug/2026 00:53:06] "GET /invalid_route HTTP/1.1" 404 -
@@ -186,7 +186,7 @@ OK
 
 ---
 
-### 5.4 `termux_llamacpp/security.py`
+### 5.4 `amv_llamacpp/security.py`
 ```python
 {security_py_content}
 ```
@@ -200,7 +200,7 @@ OK
 ```
 """
 
-    report_path = ROOT / "termux-llamacpp-full-source-and-report.md"
+    report_path = ROOT / "amv-llamacpp-full-source-and-report.md"
     report_path.write_text(report_md, encoding="utf-8")
     print(f"[+] Successfully wrote deterministic report to {report_path}")
 

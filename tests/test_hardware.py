@@ -4,7 +4,7 @@
 
 import os
 import unittest
-from termux_llamacpp.hardware import (
+from amv_llamacpp.hardware import (
     detect_hardware,
     is_termux,
     is_android,
@@ -36,21 +36,21 @@ class TestHardwareDetection(unittest.TestCase):
         print_hardware_summary()
 
     def test_resolve_device_backend_cpu(self):
-        from termux_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.hardware import resolve_device_backend
         backend, ngl = resolve_device_backend("cpu")
         self.assertEqual(backend, "cpu")
         self.assertEqual(ngl, 0)
 
     def test_resolve_device_backend_auto(self):
-        from termux_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.hardware import resolve_device_backend
         backend, ngl = resolve_device_backend("auto")
         self.assertIn(backend, ("cpu", "vulkan", "cpu_neon"))
         self.assertIsInstance(ngl, int)
 
     def test_resolve_device_backend_vulkan_fail_fast_without_runtime(self):
         from unittest.mock import patch
-        from termux_llamacpp.hardware import resolve_device_backend
-        from termux_llamacpp.exceptions import TermuxLlamaError
+        from amv_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.exceptions import TermuxLlamaError
 
         with patch("ameva_device.runtime_guard.installed_runtime_version", return_value=None):
             with self.assertRaises(TermuxLlamaError) as ctx:
@@ -61,15 +61,15 @@ class TestHardwareDetection(unittest.TestCase):
 
     def test_resolve_device_backend_vulkan_transparent_error_propagation(self):
         from unittest.mock import patch, MagicMock
-        from termux_llamacpp.hardware import resolve_device_backend
-        from termux_llamacpp.exceptions import TermuxLlamaError
+        from amv_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.exceptions import TermuxLlamaError
 
         mock_avr = MagicMock()
         mock_adapter = MagicMock()
         mock_adapter.bind.side_effect = RuntimeError("Vulkan shader pipeline compilation failed: out of memory")
         mock_avr.adapters.llamacpp.LlamaCppAdapter = mock_adapter
 
-        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=mock_avr), \
+        with patch("amv_llamacpp.hardware._resolve_ameva_runtime", return_value=mock_avr), \
              patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"), \
              patch.dict("sys.modules", {"ameva_runtime.adapters.llamacpp": mock_avr.adapters.llamacpp}):
             with self.assertRaises(TermuxLlamaError) as ctx:
@@ -79,7 +79,7 @@ class TestHardwareDetection(unittest.TestCase):
             self.assertIsInstance(ctx.exception.__cause__, RuntimeError)
 
     def test_resolve_device_backend_enforces_requested_ngl(self):
-        from termux_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.hardware import resolve_device_backend
         backend, ngl = resolve_device_backend("cpu", requested_ngl=50)
         self.assertEqual(backend, "cpu")
         self.assertEqual(ngl, 0)  # CPU NEON strictly forces ngl=0
@@ -87,31 +87,31 @@ class TestHardwareDetection(unittest.TestCase):
         from unittest.mock import patch, MagicMock
         router = MagicMock()
         router.SmartRouter.return_value.route_for_llm.return_value = MagicMock(backend="vulkan", ngl=33)
-        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=MagicMock()), \
+        with patch("amv_llamacpp.hardware._resolve_ameva_runtime", return_value=MagicMock()), \
              patch.dict("sys.modules", {"ameva_runtime.router": router}):
             backend, ngl = resolve_device_backend("auto", requested_ngl=77)
         self.assertEqual((backend, ngl), ("vulkan", 77))
 
-        with patch("termux_llamacpp.hardware._resolve_ameva_runtime", return_value=None):
+        with patch("amv_llamacpp.hardware._resolve_ameva_runtime", return_value=None):
             backend, ngl = resolve_device_backend("auto", requested_ngl=77)
         self.assertEqual((backend, ngl), ("cpu", 0))  # no runtime, no GPU
 
     def test_unified_model_search_dirs(self):
-        from termux_llamacpp.hardware import get_unified_model_search_dirs
+        from amv_llamacpp.hardware import get_unified_model_search_dirs
         dirs = get_unified_model_search_dirs()
         self.assertIsInstance(dirs, list)
         self.assertGreater(len(dirs), 0)
 
     def test_resolve_device_backend_opencl(self):
         from unittest.mock import patch
-        from termux_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.hardware import resolve_device_backend
         with patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"):
             backend, ngl = resolve_device_backend("opencl", requested_ngl=32)
         self.assertEqual(backend, "opencl")
         self.assertEqual(ngl, 32)
 
     def test_resolve_device_backend_cpu_neon_rejected(self):
-        from termux_llamacpp.hardware import resolve_device_backend
+        from amv_llamacpp.hardware import resolve_device_backend
         with self.assertRaises(ValueError) as ctx:
             resolve_device_backend("cpu_neon")
         self.assertIn("Unsupported device 'cpu_neon'", str(ctx.exception))

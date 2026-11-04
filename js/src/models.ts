@@ -63,7 +63,7 @@ export class ModelManager {
   public readonly modelsDir: string;
 
   constructor(modelsDir?: string) {
-    const baseDir = process.env.TERMUX_LLAMA_HOME || path.join(os.homedir(), ".termux-llama");
+    const baseDir = process.env.TERMUX_LLAMA_HOME || path.join(os.homedir(), ".amv-llama");
     this.modelsDir = modelsDir || process.env.TERMUX_LLAMA_MODELS_DIR || path.join(baseDir, "models");
     if (!fs.existsSync(this.modelsDir)) {
       fs.mkdirSync(this.modelsDir, { recursive: true });
@@ -119,12 +119,12 @@ export class ModelManager {
 
     const destination = path.join(this.modelsDir, filename);
     if (fs.existsSync(destination)) {
-      console.log(`[termux-llamacpp] Model '${filename}' is already downloaded at ${destination}`);
+      console.log(`[amv-llamacpp] Model '${filename}' is already downloaded at ${destination}`);
       return destination;
     }
 
     const downloadUrl = `https://huggingface.co/${repoId}/resolve/main/${filename}`;
-    console.log(`[termux-llamacpp] Downloading ${filename} from ${downloadUrl}...`);
+    console.log(`[amv-llamacpp] Downloading ${filename} from ${downloadUrl}...`);
 
     const response = await fetch(downloadUrl);
     if (!response.ok) {
@@ -133,7 +133,7 @@ export class ModelManager {
 
     const buffer = Buffer.from(await response.arrayBuffer());
     fs.writeFileSync(destination, buffer);
-    console.log(`[termux-llamacpp] Model saved to ${destination}`);
+    console.log(`[amv-llamacpp] Model saved to ${destination}`);
     return destination;
   }
 

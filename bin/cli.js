@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR Commercial-License
  */
 /**
- * AMEVA Standard Node.js CLI Runner for termux_llamacpp.
- * Automatically resolves Python 3 environment and dispatches to python -m termux_llamacpp.
+ * AMEVA Standard Node.js CLI Runner for amv_llamacpp.
+ * Automatically resolves Python 3 environment and dispatches to python -m amv_llamacpp.
  */
 const fs = require('fs');
 const { spawn, execSync } = require('child_process');
@@ -34,7 +34,7 @@ function findPython() {
 }
 
 const pythonBin = findPython();
-const args = ['-m', 'termux_llamacpp', ...process.argv.slice(2)];
+const args = ['-m', 'amv_llamacpp', ...process.argv.slice(2)];
 
 const child = spawn(pythonBin, args, {
   stdio: 'inherit',
@@ -42,7 +42,7 @@ const child = spawn(pythonBin, args, {
 });
 
 child.on('error', (err) => {
-  console.error(`[${'termux_llamacpp'}] Failed to spawn python process (${pythonBin}):`, err.message);
+  console.error(`[${'amv_llamacpp'}] Failed to spawn python process (${pythonBin}):`, err.message);
   process.exit(1);
 });
 

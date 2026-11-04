@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from termux_llamacpp.security import (
+from amv_llamacpp.security import (
     canonicalize_json,
     compute_sha256,
     verify_binary_integrity,
@@ -24,7 +24,7 @@ from termux_llamacpp.security import (
     SecurityVerificationError,
     BinaryTrustLevel,
 )
-from termux_llamacpp.config import LLAMA_CPP_PINNED_COMMIT
+from amv_llamacpp.config import LLAMA_CPP_PINNED_COMMIT
 
 
 class TestSecurityAndManifest(unittest.TestCase):

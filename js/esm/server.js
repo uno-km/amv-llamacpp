@@ -41,7 +41,7 @@ class ServerInstance {
             this.httpServer.close();
             this.httpServer = undefined;
         }
-        console.log(`[termux-llamacpp] Server on ${this.endpoint} stopped.`);
+        console.log(`[amv-llamacpp] Server on ${this.endpoint} stopped.`);
     }
 }
 exports.ServerInstance = ServerInstance;
@@ -52,14 +52,14 @@ class ServerManager {
         const modelName = node_path_1.default.basename(resolvedModelPath);
         const pyCmd = process.env.PYTHON || "python3";
         console.log("================================================================================");
-        console.log(`  [termux-llamacpp] Node.js Native Runtime Bridge`);
+        console.log(`  [amv-llamacpp] Node.js Native Runtime Bridge`);
         console.log("================================================================================");
         console.log(`  Model Path : ${modelName}`);
         console.log(`  Endpoint   : http://${host}:${port}`);
         console.log("================================================================================");
         const args = [
             "-m",
-            "termux_llamacpp",
+            "amv_llamacpp",
             "serve",
             resolvedModelPath,
             "--host",

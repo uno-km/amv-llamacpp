@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
-termux_llamacpp.adapter
+amv_llamacpp.adapter
 ========================
 AMEVA Component Protocol v1 — Orchestrator Adapter (v0.8.1 호환)
 
@@ -13,7 +13,7 @@ from typing import Any, AsyncIterator
 
 from ameva_component.adapter_base import BaseOrchestratorAdapter
 from ameva_component.exceptions import OperationNotSupported
-from termux_llamacpp.control.component import LlamaCppControl
+from amv_llamacpp.control.component import LlamaCppControl
 
 
 class LlamaCppOrchestratorAdapter(BaseOrchestratorAdapter):
@@ -24,7 +24,7 @@ class LlamaCppOrchestratorAdapter(BaseOrchestratorAdapter):
     직접 streaming이 필요한 경우 서브클래스에서 오버라이드하십시오.
     """
 
-    COMPONENT_ID = "termux-llamacpp"
+    COMPONENT_ID = "amv-llamacpp"
 
     def __init__(self, control: LlamaCppControl | None = None) -> None:
         self._control = control or LlamaCppControl()

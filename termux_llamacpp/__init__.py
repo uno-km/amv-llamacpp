@@ -1,105 +1,55 @@
-# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
-"""termux-llamacpp: Universal GGUF Runtime, Model Manager & OpenAI Server for Android Termux & ARM64."""
+# SPDX-License-Identifier: Apache-2.0
+"""Deprecated alias of :mod:`amv_llamacpp`.
 
-__version__ = "1.5.1"
+WHAT: ``import termux_llamacpp`` (and ``import termux_llamacpp.<sub>``) keeps working and returns the
+      very same module objects as ``amv_llamacpp``.
+WHY:  the package was renamed from termux-llamacpp to amv-llamacpp in 2.0.0; user code
+      written against the old import name should not break on upgrade.
+HOW:  a meta-path finder maps every ``termux_llamacpp.*`` name to ``amv_llamacpp.*`` and this
+      package replaces itself in ``sys.modules`` with ``amv_llamacpp``.
 
-from termux_llamacpp.config import (
-    RuntimeConfig,
-    ServerConfig,
-    ModelInfo,
-    BuildPreset,
-    GenerationMetrics,
-    CURATED_MODELS,
-    AVAILABLE_MODELS,
-    BUILD_PRESETS,
-    LLAMA_CPP_PINNED_COMMIT,
-    PROTOCOL_VERSION,
-)
-from termux_llamacpp.engine import LlamaRuntime, generate_vlm, VLMResponse
-from termux_llamacpp.downloader import ModelManager, download_model, list_models, resolve_model_path
-from termux_llamacpp.crawler import HuggingFaceCrawler, discover_hf_models
-from termux_llamacpp.hardware import detect_hardware, print_hardware_summary, HardwareProfile, resolve_device, is_termux, is_android, bind_hardware
-from termux_llamacpp.server import ServerManager, ServerInstance, ProcessIdentityLock
-from termux_llamacpp.security import (
-    compute_sha256,
-    verify_file_sha256,
-    verify_binary_integrity,
-    atomic_replace_verified,
-    build_model_manifest_payload,
-    save_signed_model_manifest,
-    verify_binary_pre_execution,
-    verify_model_pre_execution,
-    TrustStore,
-)
-from termux_llamacpp.exceptions import (
-    AmevaTermuxError,
-    TermuxLlamaError,
-    ModelNotFoundError,
-    DependencyMissingError,
-    RuntimeBuildError,
-    ServerStartupError,
-    SecurityVerificationError,
+This alias will be removed in a future major release. Import ``amv_llamacpp`` instead.
+"""
+import importlib
+import importlib.abc
+import importlib.util
+import sys
+import warnings
+
+_OLD = "termux_llamacpp"
+_NEW = "amv_llamacpp"
+
+warnings.warn(
+    f"'{_OLD}' was renamed to '{_NEW}'; import '{_NEW}' instead. "
+    "The old name will be removed in a future major release.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
 
-__version__ = "1.5.1"
-__author__ = "uno-km"
+class _AliasLoader(importlib.abc.Loader):
+    def create_module(self, spec):
+        return importlib.import_module(_NEW + spec.name[len(_OLD):])
 
-__all__ = [
-    "LlamaRuntime",
-    "generate_vlm",
-    "VLMResponse",
-    "ModelManager",
-    "ServerManager",
-    "ServerInstance",
-    "ProcessIdentityLock",
-    "HuggingFaceCrawler",
-    "discover_hf_models",
-    "download_model",
-    "detect_hardware",
-    "is_termux",
-    "is_android",
-    "bind_hardware",
-    "print_hardware_summary",
-    "compute_sha256",
-    "verify_file_sha256",
-    "verify_binary_integrity",
-    "atomic_replace_verified",
-    "build_model_manifest_payload",
-    "save_signed_model_manifest",
-    "verify_binary_pre_execution",
-    "verify_model_pre_execution",
-    "TrustStore",
-    "RuntimeConfig",
-    "ServerConfig",
-    "ModelInfo",
-    "BuildPreset",
-    "GenerationMetrics",
-    "CURATED_MODELS",
-    "AVAILABLE_MODELS",
-    "BUILD_PRESETS",
-    "LLAMA_CPP_PINNED_COMMIT",
-    "PROTOCOL_VERSION",
-    "HardwareProfile",
-    "resolve_device",
-    "list_models",
-    "resolve_model_path",
-    "AmevaTermuxError",
-    "TermuxLlamaError",
-    "ModelNotFoundError",
-    "DependencyMissingError",
-    "RuntimeBuildError",
-    "ServerStartupError",
-    "SecurityVerificationError",
-]
+    def exec_module(self, module):
+        return None
 
 
+class _AliasFinder(importlib.abc.MetaPathFinder):
+    _loader = _AliasLoader()
 
-# Standard Unified Engine & Factory
-LlamaEngine = LlamaRuntime
+    def find_spec(self, fullname, path=None, target=None):
+        if not fullname.startswith(_OLD + "."):
+            return None
+        if fullname.endswith(".__main__"):
+            # Let runpy load amv_llamacpp/__main__.py through the normal path finder.
+            return None
+        return importlib.util.spec_from_loader(fullname, self._loader)
 
-def load(model: str = "default", device: str = "auto", **kwargs) -> LlamaEngine:
-    """Standard Unified Engine Factory for termux-llamacpp."""
-    config = RuntimeConfig(preset=kwargs.get("preset", "balanced"))
-    return LlamaEngine(config=config)
+
+if not any(getattr(f, "_amv_alias_of", None) == _OLD for f in sys.meta_path):
+    _finder = _AliasFinder()
+    _finder._amv_alias_of = _OLD
+    sys.meta_path.insert(0, _finder)
+
+sys.modules[_OLD] = importlib.import_module(_NEW)

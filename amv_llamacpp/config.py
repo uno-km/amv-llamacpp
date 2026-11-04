@@ -25,14 +25,14 @@ DEFAULT_BASE_DIR = PREFIX
 
 # XDG Standard Cache Base Directory (Single SSOT)
 XDG_CACHE_HOME = Path(os.environ.get("XDG_CACHE_HOME") or (Path.home() / ".cache"))
-DEFAULT_XDG_MODELS_DIR = XDG_CACHE_HOME / "termux-llamacpp" / "models"
+DEFAULT_XDG_MODELS_DIR = XDG_CACHE_HOME / "amv-llamacpp" / "models"
 
 _custom_models = os.environ.get("TERMUX_LLAMA_MODELS_DIR") or os.environ.get("TERMUX_LLAMACPP_MODELS_DIR")
 DEFAULT_MODELS_DIR = Path(_custom_models) if _custom_models else DEFAULT_XDG_MODELS_DIR
 
 DEFAULT_BIN_DIR = Path(os.environ.get("TERMUX_LLAMA_BIN_DIR", PREFIX / "bin"))
 DEFAULT_RUN_DIR = Path(os.environ.get("TERMUX_LLAMA_RUN_DIR", Path.home() / ".local" / "run"))
-DEFAULT_LOG_DIR = Path(os.environ.get("TERMUX_LLAMA_LOG_DIR", Path.home() / ".local" / "state" / "termux-llamacpp"))
+DEFAULT_LOG_DIR = Path(os.environ.get("TERMUX_LLAMA_LOG_DIR", Path.home() / ".local" / "state" / "amv-llamacpp"))
 TRUST_DIR = Path(__file__).parent / "trust"
 
 

@@ -6,4 +6,4 @@ include CMakeLists.txt
 recursive-include scripts *.sh *.py *.js
 recursive-include docs *
 recursive-include js *
-recursive-include termux_llamacpp *
+recursive-include amv_llamacpp *

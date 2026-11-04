@@ -30,7 +30,7 @@ Ships verified Android ARM64 native binaries with bundled shared libraries and d
 pip install amv-llamacpp
 ```
 ```python
-from termux_llamacpp import LlamaRuntime, RuntimeConfig
+from amv_llamacpp import LlamaRuntime, RuntimeConfig
 
 # 1. Initialize Runtime with Vulkan GPU Acceleration
 config = RuntimeConfig(

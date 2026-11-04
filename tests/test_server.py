@@ -11,15 +11,15 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 import requests
 
-from termux_llamacpp.server import (
+from amv_llamacpp.server import (
     ServerManager,
     native_is_ready,
     normalize_loopback_bind_host,
     ServerConflictError,
 )
-from termux_llamacpp.config import PROTOCOL_VERSION, LLAMA_CPP_PINNED_COMMIT
-from termux_llamacpp.exceptions import ServerStartupError
-from termux_llamacpp.security import compute_sha256, SecurityVerificationError, BinaryTrustLevel
+from amv_llamacpp.config import PROTOCOL_VERSION, LLAMA_CPP_PINNED_COMMIT
+from amv_llamacpp.exceptions import ServerStartupError
+from amv_llamacpp.security import compute_sha256, SecurityVerificationError, BinaryTrustLevel
 
 
 class TestServerManager(unittest.TestCase):
@@ -131,7 +131,7 @@ class TestServerManager(unittest.TestCase):
         # Offline endpoint returns False
         self.assertFalse(native_is_ready("http://127.0.0.1:59999", expected_model_id="test-model"))
 
-    def test_termux_aichain_health_handshake_and_transfer_encoding(self):
+    def test_amv_aichain_health_handshake_and_transfer_encoding(self):
         """Test GET /health, trust level reporting, and Transfer-Encoding rejection."""
         instance = self.server_mgr.serve(
             model_path=self.dummy_model,

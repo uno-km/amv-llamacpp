@@ -1,6 +1,6 @@
 {
   "name": "amv-llamacpp",
-  "version": "1.5.1",
+  "version": "2.0.0",
   "description": "GGUF runtime, model manager & OpenAI server utilizing device resources for Android Termux & ARM64",
   "main": "index.js",
   "module": "js/esm/index.js",

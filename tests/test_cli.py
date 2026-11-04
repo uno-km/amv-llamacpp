@@ -7,12 +7,12 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from termux_llamacpp.cli import main
+from amv_llamacpp.cli import main
 
 
 class TestCLIExecution(unittest.TestCase):
     def test_cli_help(self):
-        with patch("sys.argv", ["termux-llama", "--help"]), patch("sys.stdout", new_callable=io.StringIO) as out:
+        with patch("sys.argv", ["amv-llama", "--help"]), patch("sys.stdout", new_callable=io.StringIO) as out:
             with self.assertRaises(SystemExit) as ctx:
                 main()
             self.assertEqual(ctx.exception.code, 0)
@@ -23,27 +23,27 @@ class TestCLIExecution(unittest.TestCase):
             self.assertIn("find", output)
 
     def test_cli_models(self):
-        with patch("sys.argv", ["termux-llama", "models"]), patch("sys.stdout", new_callable=io.StringIO) as out:
+        with patch("sys.argv", ["amv-llama", "models"]), patch("sys.stdout", new_callable=io.StringIO) as out:
             main()
             output = out.getvalue()
             self.assertIn("qwen2.5-1.5b-instruct", output)
             self.assertIn("llama-3.2-1b-instruct", output)
 
     def test_cli_doctor(self):
-        with patch("sys.argv", ["termux-llama", "doctor"]), patch("sys.stdout", new_callable=io.StringIO) as out:
+        with patch("sys.argv", ["amv-llama", "doctor"]), patch("sys.stdout", new_callable=io.StringIO) as out:
             main()
             output = out.getvalue()
             self.assertIn("Architecture", output)
 
     def test_cli_run_without_model_fails_fast(self):
-        with patch("sys.argv", ["termux-llama", "run"]), patch("sys.stderr", new_callable=io.StringIO) as err:
+        with patch("sys.argv", ["amv-llama", "run"]), patch("sys.stderr", new_callable=io.StringIO) as err:
             with self.assertRaises(SystemExit) as ctx:
                 main()
             self.assertEqual(ctx.exception.code, 1)
             self.assertIn("MODEL NOT SPECIFIED", err.getvalue())
 
     def test_cli_run_help_shows_rpc_flags(self):
-        with patch("sys.argv", ["termux-llama", "run", "--help"]), patch("sys.stdout", new_callable=io.StringIO) as out:
+        with patch("sys.argv", ["amv-llama", "run", "--help"]), patch("sys.stdout", new_callable=io.StringIO) as out:
             with self.assertRaises(SystemExit) as ctx:
                 main()
             self.assertEqual(ctx.exception.code, 0)
@@ -53,9 +53,9 @@ class TestCLIExecution(unittest.TestCase):
 
     def test_cli_run_rpc_dispatch(self):
         with patch("sys.argv", [
-            "termux-llama", "run", "qwen2.5-1.5b-instruct", "test prompt",
+            "amv-llama", "run", "qwen2.5-1.5b-instruct", "test prompt",
             "--rpc", "192.168.0.220:50052", "-ts", "50,50", "-ngl", "16"
-        ]), patch("termux_llamacpp.cli.LlamaRuntime") as mock_runtime_cls:
+        ]), patch("amv_llamacpp.cli.LlamaRuntime") as mock_runtime_cls:
             mock_runtime = mock_runtime_cls.return_value
             mock_runtime.generate.return_value = "mock response"
             with patch("sys.stdout", new_callable=io.StringIO) as out:

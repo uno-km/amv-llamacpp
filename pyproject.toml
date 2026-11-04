@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "amv-llamacpp"
-version = "1.5.1"
+version = "2.0.0"
 description = "GGUF runtime, model manager & OpenAI server utilizing device resources for Android Termux & ARM64"
 readme = "README.md"
 authors = [{ name = "uno-km", email = "dev@ameva.org" }]
@@ -105,11 +105,11 @@ test = [
 ]
 
 [project.scripts]
-amv-llama = "termux_llamacpp.cli:main"
-amv-llamacpp = "termux_llamacpp.cli:main"
+amv-llama = "amv_llamacpp.cli:main"
+amv-llamacpp = "amv_llamacpp.cli:main"
 
 [project.entry-points."ameva.components"]
-amv-llamacpp = "termux_llamacpp.adapter:create_adapter"
+amv-llamacpp = "amv_llamacpp.adapter:create_adapter"
 
 [project.urls]
 Homepage = "https://uno-km.github.io/amv-llamacpp"
@@ -117,10 +117,10 @@ Repository = "https://github.com/uno-km/amv-llamacpp"
 Documentation = "https://uno-km.github.io/amv-llamacpp"
 
 [tool.setuptools.packages.find]
-include = ["termux_llamacpp", "termux_llamacpp.*"]
+include = ["amv_llamacpp", "amv_llamacpp.*", "termux_llamacpp"]
 
 [tool.setuptools.package-data]
-termux_llamacpp = [
+amv_llamacpp = [
     "scripts/*.sh",
     "registry/*.json",
     "trust/*.pub",

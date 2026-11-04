@@ -17,15 +17,15 @@ from typing import Optional, List, Dict, Union, Any
 import requests
 from tqdm import tqdm
 
-logger = logging.getLogger("termux_llamacpp.downloader")
+logger = logging.getLogger("amv_llamacpp.downloader")
 
-from termux_llamacpp.config import (
+from amv_llamacpp.config import (
     DEFAULT_MODELS_DIR,
     CURATED_MODELS,
     ModelInfo,
 )
-from termux_llamacpp.exceptions import ModelNotFoundError, ModelNotSpecifiedError, TermuxLlamaError
-from termux_llamacpp.security import (
+from amv_llamacpp.exceptions import ModelNotFoundError, ModelNotSpecifiedError, TermuxLlamaError
+from amv_llamacpp.security import (
     compute_sha256,
     verify_file_sha256,
     atomic_write_and_verify,
@@ -50,7 +50,7 @@ def check_disk_space(target_dir: Path, required_bytes: int):
             required_mb = required_bytes / (1024 * 1024)
             free_mb = usage.free / (1024 * 1024)
             print(
-                f"[termux-llamacpp] WARNING: Low disk space detected in '{target_dir}'. "
+                f"[amv-llamacpp] WARNING: Low disk space detected in '{target_dir}'. "
                 f"Required: {required_mb:.1f} MB, Available: {free_mb:.1f} MB. "
                 f"Proceeding under user responsibility."
             )
@@ -100,7 +100,7 @@ class ModelManager:
 
         # Fallback to AMEVA Unified Model Search Paths across ecosystem
         try:
-            from termux_llamacpp.hardware import get_unified_model_search_dirs
+            from amv_llamacpp.hardware import get_unified_model_search_dirs
             for alt_dir in get_unified_model_search_dirs("llama"):
                 if alt_dir != self.models_dir and alt_dir.is_dir():
                     for cand in [alt_dir / str(model_identifier), alt_dir / f"{model_identifier}.gguf"]:
@@ -187,21 +187,21 @@ class ModelManager:
 
         if destination.is_file() and not force:
             if expected_sha256:
-                print(f"[termux-llamacpp] Validating existing model checksum: {target_filename}...")
+                print(f"[amv-llamacpp] Validating existing model checksum: {target_filename}...")
                 current_hash = compute_sha256(destination)
                 if current_hash.lower() == expected_sha256.lower():
-                    print("[termux-llamacpp] File integrity validated (SHA-256 match). Using cached model.")
+                    print("[amv-llamacpp] File integrity validated (SHA-256 match). Using cached model.")
                     return destination.resolve()
-                print("[termux-llamacpp] Checksum mismatch. Re-downloading...")
+                print("[amv-llamacpp] Checksum mismatch. Re-downloading...")
             else:
-                print(f"[termux-llamacpp] Model '{target_filename}' already exists in cache.")
+                print(f"[amv-llamacpp] Model '{target_filename}' already exists in cache.")
                 return destination.resolve()
 
         part_file = destination.with_suffix(".part")
         meta_file = destination.with_suffix(".part.meta.json")
 
         print("================================================================================")
-        print("  [termux-llamacpp] Downloading GGUF Model (ETag Resume Protocol)")
+        print("  [amv-llamacpp] Downloading GGUF Model (ETag Resume Protocol)")
         print("================================================================================")
         print(f"  Model ID    : {model_id}")
         print(f"  Repository  : {repo_id} (rev: {model_revision})")
@@ -232,9 +232,9 @@ class ModelManager:
                     if saved_etag:
                         headers["If-Range"] = saved_etag
                     if attempt > 1:
-                        print(f"[termux-llamacpp] (Retry {attempt}/{max_retries}) Resuming download from byte {downloaded_bytes:,} (ETag: {saved_etag})...")
+                        print(f"[amv-llamacpp] (Retry {attempt}/{max_retries}) Resuming download from byte {downloaded_bytes:,} (ETag: {saved_etag})...")
                     else:
-                        print(f"[termux-llamacpp] Resuming download from byte {downloaded_bytes:,} (ETag: {saved_etag})...")
+                        print(f"[amv-llamacpp] Resuming download from byte {downloaded_bytes:,} (ETag: {saved_etag})...")
 
                 try:
                     with requests.get(download_url, stream=True, headers=headers, timeout=30) as resp:
@@ -245,7 +245,7 @@ class ModelManager:
                         content_encoding = resp.headers.get("content-encoding")
 
                         if content_encoding and content_encoding != "identity":
-                            print("[termux-llamacpp] Compressed transfer encoding detected. Discarding range resume.")
+                            print("[amv-llamacpp] Compressed transfer encoding detected. Discarding range resume.")
                             part_file.unlink(missing_ok=True)
                             downloaded_bytes = 0
 
@@ -255,9 +255,9 @@ class ModelManager:
                         elif resp.status_code == 416:
                             expected_size = saved_meta.get("expected_size", 0)
                             if downloaded_bytes > 0:
-                                print("[termux-llamacpp] Range 416 returned. Validating part file integrity...")
+                                print("[amv-llamacpp] Range 416 returned. Validating part file integrity...")
                                 if expected_size and downloaded_bytes != expected_size:
-                                    print("[termux-llamacpp] Size mismatch on 416. Resetting part file...")
+                                    print("[amv-llamacpp] Size mismatch on 416. Resetting part file...")
                                     part_file.unlink(missing_ok=True)
                                     meta_file.unlink(missing_ok=True)
                                     downloaded_bytes = 0
@@ -279,7 +279,7 @@ class ModelManager:
                                 write_mode = "wb"
                         else:
                             if downloaded_bytes > 0:
-                                print("[termux-llamacpp] Server responded with 200 OK. Resetting part file to 0.")
+                                print("[amv-llamacpp] Server responded with 200 OK. Resetting part file to 0.")
                             part_file.unlink(missing_ok=True)
                             downloaded_bytes = 0
                             total_size = int(resp.headers.get("content-length", 0))
@@ -324,7 +324,7 @@ class ModelManager:
                             f"Failed to download model '{target_filename}' after {max_retries} attempts: {stream_err}"
                         ) from stream_err
                     print(
-                        f"\n[termux-llamacpp] Download stream interrupted ({stream_err}). "
+                        f"\n[amv-llamacpp] Download stream interrupted ({stream_err}). "
                         f"Retrying ({attempt}/{max_retries}) in {retry_delay:.0f}s with Range resume..."
                     )
                     import time
@@ -361,7 +361,7 @@ class ModelManager:
             manifest_path = final_path.with_suffix(final_path.suffix + ".manifest.json")
             atomic_save_json(manifest_path, payload)
 
-            print(f"[termux-llamacpp] Model verified and saved: {final_path}\n")
+            print(f"[amv-llamacpp] Model verified and saved: {final_path}\n")
             return final_path
 
         except Exception as e:
@@ -375,7 +375,7 @@ class ModelManager:
 
         search_dirs = [self.models_dir]
         try:
-            from termux_llamacpp.hardware import get_unified_model_search_dirs
+            from amv_llamacpp.hardware import get_unified_model_search_dirs
             for alt in get_unified_model_search_dirs("llama"):
                 if alt not in search_dirs and alt.is_dir():
                     search_dirs.append(alt)
@@ -408,7 +408,7 @@ class ModelManager:
                 manifest = model_path.with_suffix(model_path.suffix + ".manifest.json")
                 if manifest.is_file():
                     manifest.unlink()
-                print(f"[termux-llamacpp] Removed model and manifest: {model_path}")
+                print(f"[amv-llamacpp] Removed model and manifest: {model_path}")
                 return True
         except ModelNotFoundError as _err:
             logger.debug("Cannot remove non-existent model %s: %s", model_identifier, _err)
@@ -438,7 +438,7 @@ def resolve_model_path(
     model_identifier: str,
     models_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
-    """Standard Unified Model Path Resolver for termux-llamacpp."""
+    """Standard Unified Model Path Resolver for amv-llamacpp."""
     manager = ModelManager(models_dir)
     return manager.resolve_model_path(model_identifier)
 
