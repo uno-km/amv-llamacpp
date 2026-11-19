@@ -73,9 +73,9 @@ console.log(`Generation Speed: ${result.metrics.evalTokensPerSec} t/s`);
 ---
 
 ## Official Documentation & Benchmarks
-- [Official Architecture & API Reference](https://uno-km.vercel.app/lib/llamacpp/)
-- [Ecosystem Metrics & Registry Stats](https://uno-km.vercel.app/foundation/metrics)
-- [AMEVA Open-Source Foundation Portal](https://uno-km.vercel.app/foundation/index.html)
+- [Official Architecture & API Reference](https://ameva.pro/lib/llamacpp/)
+- [Ecosystem Metrics & Registry Stats](https://ameva.pro/foundation/metrics)
+- [AMEVA Open-Source Foundation Portal](https://ameva.pro/foundation/index.html)
 
 ---
 
